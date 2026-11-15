@@ -171,7 +171,7 @@
           </button>
           <button onclick="startGame('timetrial')" class="group relative bg-gradient-to-b from-amber-400 to-orange-600 hover:from-amber-300 hover:to-orange-500 text-white rounded-2xl p-5 border-b-8 border-orange-800 active:border-b-0 active:translate-y-2 transition-all shadow-xl">
             <div class="text-3xl md:text-4xl font-black mb-1">タイムトライアル</div>
-            <div class="text-sm font-bold text-amber-100">全ステージ(18問)制覇の時間を計測！</div>
+            <div class="text-sm font-bold text-amber-100">全ステージ(24問)制覇の時間を計測！</div>
           </button>
         </div>
       </div>
@@ -515,7 +515,7 @@
      **************************************************************/
     let playerName = "";
     let isTimeTrial = false;
-    const TIME_TRIAL_TARGET = 18; // 全6ステージ×3問＝18問で完全制覇
+    const TIME_TRIAL_TARGET = 24; // 全6ステージ×4問＝24問（1周）で完全制覇
     let gameDuration = 180;
     let timeLeft = 180;
     let elapsedSeconds = 0;
@@ -991,52 +991,62 @@
         ]);
         return {
           category: 'circuit',
-          question: `${p.R1}Ωと${p.R2}Ωの抵抗を「並列」につなぎ、${p.V}Vを加えた。回路全体の電流は何Aか？`,
+          question: `${p.R1}Ωと${p.R2}Ωの抵抗を「並列」につなぎ、${p.V}Vの電源につないだ。回路全体に流れる電流は何Aか？`,
           unit: 'A',
           answer: p.I,
-          dummies: [formatNum(p.V / (p.R1 + p.R2)), p.I1, p.I2],
-          formula: '並列は各抵抗に同じ電圧がかかる → それぞれの電流を出して足す',
-          explanation: `${p.V}÷${p.R1}＝${p.I1}A と ${p.V}÷${p.R2}＝${p.I2}A を足して、全体は ${p.I}A`
+          dummies: [formatNum(p.V / (p.R1 + p.R2)), p.I1, p.I2, p.I * 2],
+          formula: '①各抵抗の電流(V÷R)を出す → ②2つの電流を足す',
+          explanation: `${p.V}÷${p.R1}＝${p.I1}A と ${p.V}÷${p.R2}＝${p.I2}A を足して、${p.I1}＋${p.I2}＝${p.I}A`
         };
       }
     ];
 
-    // 現在の正解数に応じた出題ステージ（第1段階〜第6段階）を返す関数
+    // 現在の正解数に応じた出題ステージ（第1段階〜第6段階・4問ずつ＆周回ループ対応）を返す関数
     function getCurrentStageInfo(currentCorrect) {
-      if (currentCorrect < 3) {
+      const lap = Math.floor(currentCorrect / 24) + 1;
+      const countInLap = currentCorrect % 24;
+      const lapSuffix = lap >= 2 ? ` - ${lap}周目!!` : '';
+
+      if (countInLap < 4) {
         return {
           level: 1,
-          title: 'STAGE 1：オームの法則（基本 V・R・I）',
+          lap: lap,
+          title: `STAGE 1：オームの法則（基本 V・R・I）${lapSuffix}`,
           indices: [0, 1, 2]
         };
-      } else if (currentCorrect < 6) {
+      } else if (countInLap < 8) {
         return {
           level: 2,
-          title: 'STAGE 2：オームの法則（mA単位変換）',
+          lap: lap,
+          title: `STAGE 2：オームの法則（mA単位変換）${lapSuffix}`,
           indices: [3, 4]
         };
-      } else if (currentCorrect < 9) {
+      } else if (countInLap < 12) {
         return {
           level: 3,
-          title: 'STAGE 3：電力と逆算・家電表示',
+          lap: lap,
+          title: `STAGE 3：電力と逆算・家電表示${lapSuffix}`,
           indices: [5, 6, 7, 8, 9]
         };
-      } else if (currentCorrect < 12) {
+      } else if (countInLap < 16) {
         return {
           level: 4,
-          title: 'STAGE 4：熱量(J)・電力量(Wh)・分変換',
+          lap: lap,
+          title: `STAGE 4：熱量(J)・電力量(Wh)・分変換${lapSuffix}`,
           indices: [10, 11, 12]
         };
-      } else if (currentCorrect < 15) {
+      } else if (countInLap < 20) {
         return {
           level: 5,
-          title: 'STAGE 5：熱量からの時間(秒)の逆算',
+          lap: lap,
+          title: `STAGE 5：熱量からの時間(秒)の逆算${lapSuffix}`,
           indices: [13]
         };
       } else {
         return {
           level: 6,
-          title: 'STAGE 6：2つの抵抗（直列・並列回路）',
+          lap: lap,
+          title: `STAGE 6：2つの抵抗（直列・並列回路）${lapSuffix}`,
           indices: [14, 15, 16, 17]
         };
       }
@@ -1393,7 +1403,7 @@
 
       // モードと名前・現在日時の表示
       const modeLabel = isTimeTrial
-        ? "タイムトライアル(全18問制覇)"
+        ? "タイムトライアル(全24問制覇)"
         : Math.floor(gameDuration / 60) + "分モード";
       document.getElementById('res-mode-badge').textContent = modeLabel;
       document.getElementById('res-player-name').textContent = playerName;
@@ -1422,15 +1432,15 @@
       let achieved = null;
 
       if (isTimeTrial) {
-        // タイムトライアル用ランク判定（全18問クリアにかかった秒数で判定）
+        // タイムトライアル用ランク判定（全24問クリアにかかった秒数で判定）
         const timeRanks = [
-          { maxSec: 75, icon: "🌌👑⚡", title: "【神域】ニコラ・テスラ級", msg: "1分15秒以内で全ステージ完全制覇！人類の限界を超える超光速の頭脳です！！", style: "bg-gradient-to-r from-fuchsia-600 via-amber-500 to-cyan-500 border-yellow-200 text-white", confetti: 220 },
-          { maxSec: 95, icon: "👑⚡✨", title: "【伝説】エジソン級 電撃王", msg: "圧倒的なスピードで全18問を突破！クラス誰もが驚く天才発明家レベルです！", style: "bg-gradient-to-r from-amber-500 via-yellow-500 to-orange-500 border-white text-slate-950", confetti: 160 },
-          { maxSec: 120, icon: "🐉⚡", title: "【SSS】雷神（らいじん）", msg: "2分以内のスピード制覇！カミナリのような判断力でテストも満点間違いなし！", style: "bg-gradient-to-r from-indigo-600 to-purple-600 border-amber-300 text-white", confetti: 120 },
-          { maxSec: 150, icon: "💎⚡", title: "【SS】超電導グランドマスター", msg: "抵抗ゼロのスムーズな思考回路！全6ステージの公式が完全に身についています！", style: "bg-gradient-to-r from-cyan-600 to-blue-700 border-cyan-200 text-white", confetti: 80 },
-          { maxSec: 180, icon: "🏆✨", title: "【S】オームの貴公子・姫", msg: "3分以内で全ステージ制覇！単位変換や直列・並列回路にもバッチリ対応できています！", style: "bg-emerald-700 border-emerald-300 text-white", confetti: 50 },
-          { maxSec: 240, icon: "🥇", title: "【A】熟練の電気エンジニア", msg: "最後までしっかり解き切りました！ミスを減らせばさらにタイムが縮まります！", style: "bg-blue-800 border-blue-400 text-white", confetti: 25 },
-          { maxSec: 99999, icon: "🥈", title: "【B】完走チャレンジャー", msg: "全ステージ18問クリア達成！もう一度挑戦して自己ベストタイムを更新しよう！", style: "bg-slate-800 border-slate-500 text-white", confetti: 15 }
+          { maxSec: 100, icon: "🌌👑⚡", title: "【神域】ニコラ・テスラ級", msg: "1分40秒以内で全24問を完全制覇！人類の限界を超える超光速の頭脳です！！", style: "bg-gradient-to-r from-fuchsia-600 via-amber-500 to-cyan-500 border-yellow-200 text-white", confetti: 220 },
+          { maxSec: 125, icon: "👑⚡✨", title: "【伝説】エジソン級 電撃王", msg: "圧倒的なスピードで全24問を突破！クラス誰もが驚く天才発明家レベルです！", style: "bg-gradient-to-r from-amber-500 via-yellow-500 to-orange-500 border-white text-slate-950", confetti: 160 },
+          { maxSec: 160, icon: "🐉⚡", title: "【SSS】雷神（らいじん）", msg: "2分40秒以内のスピード制覇！カミナリのような判断力でテストも満点間違いなし！", style: "bg-gradient-to-r from-indigo-600 to-purple-600 border-amber-300 text-white", confetti: 120 },
+          { maxSec: 200, icon: "💎⚡", title: "【SS】超電導グランドマスター", msg: "抵抗ゼロのスムーズな思考回路！全6ステージの公式が完全に身についています！", style: "bg-gradient-to-r from-cyan-600 to-blue-700 border-cyan-200 text-white", confetti: 80 },
+          { maxSec: 240, icon: "🏆✨", title: "【S】オームの貴公子・姫", msg: "4分以内で全ステージ制覇！単位変換や直列・並列回路にもバッチリ対応できています！", style: "bg-emerald-700 border-emerald-300 text-white", confetti: 50 },
+          { maxSec: 320, icon: "🥇", title: "【A】熟練の電気エンジニア", msg: "最後までしっかり解き切りました！ミスを減らせばさらにタイムが縮まります！", style: "bg-blue-800 border-blue-400 text-white", confetti: 25 },
+          { maxSec: 99999, icon: "🥈", title: "【B】完走チャレンジャー", msg: "全ステージ24問クリア達成！もう一度挑戦して自己ベストタイムを更新しよう！", style: "bg-slate-800 border-slate-500 text-white", confetti: 15 }
         ];
         achieved = timeRanks.find(r => elapsedSeconds <= r.maxSec) || timeRanks[timeRanks.length - 1];
       } else {
