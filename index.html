@@ -149,7 +149,7 @@
         <input 
           type="text" 
           id="player-name" 
-          placeholder="例：2年1組 15番 理科太郎" 
+          placeholder="例：2年A組 15番 理科太郎" 
           class="w-full text-center text-2xl md:text-3xl font-black text-slate-900 bg-white rounded-xl px-4 py-3 border-4 border-amber-400 focus:outline-none focus:ring-4 focus:ring-amber-300"
         >
         <p id="name-warning" class="text-rose-400 font-bold text-center mt-2 hidden animate-bounce">
@@ -159,19 +159,19 @@
 
       <!-- 時間選択＆ゲームスタートボタン -->
       <div class="space-y-3">
-        <h2 class="text-center text-2xl font-extrabold text-cyan-300">⏱️ 制限時間を選んでスタート！</h2>
+        <h2 class="text-center text-2xl font-extrabold text-cyan-300">⏱️ モードを選んでスタート！</h2>
         <div class="grid grid-cols-3 gap-5 max-w-4xl mx-auto">
-          <button onclick="startGame(60)" class="group relative bg-gradient-to-b from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-white rounded-2xl p-5 border-b-8 border-blue-800 active:border-b-0 active:translate-y-2 transition-all shadow-xl">
-            <div class="text-4xl font-black mb-1">1分モード</div>
-            <div class="text-sm font-bold text-cyan-100">スピード決戦！短期集中</div>
-          </button>
-          <button onclick="startGame(120)" class="group relative bg-gradient-to-b from-emerald-400 to-green-600 hover:from-emerald-300 hover:to-green-500 text-white rounded-2xl p-5 border-b-8 border-green-800 active:border-b-0 active:translate-y-2 transition-all shadow-xl">
-            <div class="text-4xl font-black mb-1">2分モード</div>
-            <div class="text-sm font-bold text-emerald-100">標準バランス！実力試し</div>
-          </button>
-          <button onclick="startGame(180)" class="group relative bg-gradient-to-b from-amber-400 to-orange-600 hover:from-amber-300 hover:to-orange-500 text-white rounded-2xl p-5 border-b-8 border-orange-800 active:border-b-0 active:translate-y-2 transition-all shadow-xl">
+          <button onclick="startGame(180)" class="group relative bg-gradient-to-b from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-white rounded-2xl p-5 border-b-8 border-blue-800 active:border-b-0 active:translate-y-2 transition-all shadow-xl">
             <div class="text-4xl font-black mb-1">3分モード</div>
-            <div class="text-sm font-bold text-amber-100">持久力＆超高得点バトル！</div>
+            <div class="text-sm font-bold text-cyan-100">標準バランス！スコア競争</div>
+          </button>
+          <button onclick="startGame(300)" class="group relative bg-gradient-to-b from-emerald-400 to-green-600 hover:from-emerald-300 hover:to-green-500 text-white rounded-2xl p-5 border-b-8 border-green-800 active:border-b-0 active:translate-y-2 transition-all shadow-xl">
+            <div class="text-4xl font-black mb-1">5分モード</div>
+            <div class="text-sm font-bold text-emerald-100">じっくり演習＆超高得点！</div>
+          </button>
+          <button onclick="startGame('timetrial')" class="group relative bg-gradient-to-b from-amber-400 to-orange-600 hover:from-amber-300 hover:to-orange-500 text-white rounded-2xl p-5 border-b-8 border-orange-800 active:border-b-0 active:translate-y-2 transition-all shadow-xl">
+            <div class="text-3xl md:text-4xl font-black mb-1">タイムトライアル</div>
+            <div class="text-sm font-bold text-amber-100">全ステージ(18問)制覇の時間を計測！</div>
           </button>
         </div>
       </div>
@@ -275,10 +275,10 @@
     <!-- 上部ステータスバー -->
     <div class="bg-slate-800 border-b-2 border-slate-700 px-4 py-2 flex items-center justify-between text-white shrink-0 h-16">
       <div class="flex items-center gap-6">
-        <!-- 残り時間 -->
+        <!-- 残り時間 / 経過時間 -->
         <div class="flex items-center gap-2 bg-slate-900 px-4 py-1.5 rounded-xl border border-slate-600">
-          <span class="text-slate-400 font-bold text-sm">残り時間</span>
-          <span id="game-timer" class="text-3xl font-black text-cyan-400 tabular-nums">01:00</span>
+          <span id="game-timer-label" class="text-slate-400 font-bold text-sm">残り時間</span>
+          <span id="game-timer" class="text-3xl font-black text-cyan-400 tabular-nums">03:00</span>
         </div>
         <!-- スコア -->
         <div class="flex items-center gap-2 bg-slate-900 px-4 py-1.5 rounded-xl border border-slate-600">
@@ -293,24 +293,16 @@
         </div>
       </div>
 
-      <!-- 右側：救済ヒントボタン ＆ 中断ボタン -->
+      <!-- 右側：ステージ表示 ＆ 中断ボタン -->
       <div class="flex items-center gap-4">
-        <button id="btn-hint" onclick="activateHint()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-black px-4 py-2 rounded-xl shadow flex items-center gap-2 transition active:scale-95">
-          <span>💡 公式チラ見ヒント</span>
-          <span class="text-xs bg-slate-900 text-amber-300 px-2 py-0.5 rounded-md">※現在の2問の得点半分</span>
-        </button>
+        <div id="stage-badge" class="bg-indigo-900 border-2 border-indigo-400 text-indigo-100 font-black px-4 py-1.5 rounded-xl shadow text-sm md:text-base flex items-center gap-2">
+          <span>🚩</span>
+          <span id="game-stage-text">STAGE 1：オームの法則（基本）</span>
+        </div>
         <button onclick="showHome()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold text-xs px-3 py-2 rounded-lg">
           中断して戻る
         </button>
       </div>
-    </div>
-
-    <!-- 公式チラ見オーバーレイバー（ヒント発動時のみ表示） -->
-    <div id="hint-bar" class="hidden bg-amber-100 border-b-4 border-amber-400 text-slate-900 px-4 py-2.5 text-center font-black text-xl flex items-center justify-around shadow-inner shrink-0">
-      <span>【オーム】V＝R×I ／ R＝V÷I ／ I＝V÷R</span>
-      <span>【電力】P(W)＝V×I ／ I＝P÷V</span>
-      <span>【熱量・電力量】J＝W×秒 ／ Wh＝W×時間</span>
-      <span>【単位】1000mA＝1A ／ 1分＝60秒</span>
     </div>
 
     <!-- 上下2つの問題枠エリア（交互にテンポよく解くレイアウト） -->
@@ -318,10 +310,10 @@
       
       <!-- 問題枠 ①（上枠・青系） -->
       <div id="slot-container-0" class="relative flex flex-col gap-3 h-full">
-        <div id="slot-q-0" class="slot-0-bg border-4 flex-1 flex items-center justify-center px-8 text-center text-3xl md:text-4xl font-black text-slate-900 rounded-2xl shadow-md leading-snug">
+        <div id="slot-q-0" class="slot-0-bg border-4 flex-1 flex flex-col items-center justify-center px-6 py-2 text-center text-2xl md:text-3xl font-black text-slate-900 rounded-2xl shadow-md leading-snug relative">
           問題文①
         </div>
-        <div id="slot-opts-0" class="grid grid-cols-4 gap-4 h-[48%]">
+        <div id="slot-opts-0" class="grid grid-cols-4 gap-4 h-[46%]">
           <!-- JSで選択肢4つを描画 -->
         </div>
         <!-- 正解後の2秒ディレイ（お休み状態）表示 -->
@@ -333,10 +325,10 @@
 
       <!-- 問題枠 ②（下枠・オレンジ系） -->
       <div id="slot-container-1" class="relative flex flex-col gap-3 h-full">
-        <div id="slot-q-1" class="slot-1-bg border-4 flex-1 flex items-center justify-center px-8 text-center text-3xl md:text-4xl font-black text-slate-900 rounded-2xl shadow-md leading-snug">
+        <div id="slot-q-1" class="slot-1-bg border-4 flex-1 flex flex-col items-center justify-center px-6 py-2 text-center text-2xl md:text-3xl font-black text-slate-900 rounded-2xl shadow-md leading-snug relative">
           問題文②
         </div>
-        <div id="slot-opts-1" class="grid grid-cols-4 gap-4 h-[48%]">
+        <div id="slot-opts-1" class="grid grid-cols-4 gap-4 h-[46%]">
           <!-- JSで選択肢4つを描画 -->
         </div>
         <!-- 正解後の2秒ディレイ（お休み状態）表示 -->
@@ -351,11 +343,11 @@
         <div class="flex items-center justify-between border-b-2 border-rose-700 pb-4">
           <div class="flex items-center gap-3">
             <span class="bg-rose-600 text-white font-black px-5 py-2 rounded-xl text-2xl shadow">❌ お手つき！4秒間フリーズ中</span>
-            <span class="text-rose-200 font-bold text-lg">※フリーズ中も残り時間は減り続けます！正しい解き方を確認しよう！</span>
+            <span id="freeze-sub-msg" class="text-rose-200 font-bold text-lg">※フリーズ中も時間は進み続けます！正しい解き方を確認しよう！</span>
           </div>
           <div class="bg-slate-900/90 border-2 border-rose-400 px-5 py-2 rounded-xl flex items-center gap-2">
-            <span class="text-rose-300 font-bold text-sm">残り時間</span>
-            <span id="freeze-timer-mirror" class="text-3xl font-black text-rose-400 tabular-nums">01:00</span>
+            <span id="freeze-timer-label" class="text-rose-300 font-bold text-sm">残り時間</span>
+            <span id="freeze-timer-mirror" class="text-3xl font-black text-rose-400 tabular-nums">03:00</span>
           </div>
         </div>
 
@@ -393,8 +385,8 @@
       <!-- プレイヤー名・モード・日時（不正防止証明） -->
       <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/20 pb-4">
         <div class="flex items-center gap-3">
-          <span class="bg-cyan-500 text-slate-950 font-black px-3 py-1 rounded-lg text-sm" id="res-mode-badge">1分モード</span>
-          <h2 id="res-player-name" class="text-3xl md:text-4xl font-black text-white tracking-wide">2年1組 理科太郎</h2>
+          <span class="bg-cyan-500 text-slate-950 font-black px-3 py-1 rounded-lg text-sm" id="res-mode-badge">3分モード</span>
+          <h2 id="res-player-name" class="text-3xl md:text-4xl font-black text-white tracking-wide">2年A組 理科太郎</h2>
         </div>
         <div class="text-right">
           <div class="text-xs text-slate-300 font-bold">プレイ完了日時</div>
@@ -416,7 +408,7 @@
         <!-- 右：スコア詳細 -->
         <div class="md:col-span-5 space-y-3">
           <div class="bg-slate-900/80 rounded-2xl p-4 border border-white/15 text-center">
-            <div class="text-sm font-bold text-slate-400">獲得スコア</div>
+            <div id="res-main-metric-label" class="text-sm font-bold text-slate-400">獲得スコア</div>
             <div id="res-score" class="text-5xl md:text-6xl font-black text-amber-400 tabular-nums">2,450</div>
           </div>
           <div class="grid grid-cols-3 gap-2 text-center">
@@ -522,8 +514,11 @@
      * 1. 状態管理変数とサウンド合成（Web Audio API）
      **************************************************************/
     let playerName = "";
-    let gameDuration = 60;
-    let timeLeft = 60;
+    let isTimeTrial = false;
+    const TIME_TRIAL_TARGET = 18; // 全6ステージ×3問＝18問で完全制覇
+    let gameDuration = 180;
+    let timeLeft = 180;
+    let elapsedSeconds = 0;
     let timerInterval = null;
     let isPlaying = false;
 
@@ -1006,11 +1001,58 @@
       }
     ];
 
-    // ランダムな1問を生成する（現在他の枠に出ている問題文と被らないようにする）
-    function createRandomProblem(excludeQuestions = []) {
+    // 現在の正解数に応じた出題ステージ（第1段階〜第6段階）を返す関数
+    function getCurrentStageInfo(currentCorrect) {
+      if (currentCorrect < 3) {
+        return {
+          level: 1,
+          title: 'STAGE 1：オームの法則（基本 V・R・I）',
+          indices: [0, 1, 2]
+        };
+      } else if (currentCorrect < 6) {
+        return {
+          level: 2,
+          title: 'STAGE 2：オームの法則（mA単位変換）',
+          indices: [3, 4]
+        };
+      } else if (currentCorrect < 9) {
+        return {
+          level: 3,
+          title: 'STAGE 3：電力と逆算・家電表示',
+          indices: [5, 6, 7, 8, 9]
+        };
+      } else if (currentCorrect < 12) {
+        return {
+          level: 4,
+          title: 'STAGE 4：熱量(J)・電力量(Wh)・分変換',
+          indices: [10, 11, 12]
+        };
+      } else if (currentCorrect < 15) {
+        return {
+          level: 5,
+          title: 'STAGE 5：熱量からの時間(秒)の逆算',
+          indices: [13]
+        };
+      } else {
+        return {
+          level: 6,
+          title: 'STAGE 6：2つの抵抗（直列・並列回路）',
+          indices: [14, 15, 16, 17]
+        };
+      }
+    }
+
+    // ステージに合わせて1問を生成する（プリント作成時は全パターンから生成可能）
+    function createRandomProblem(excludeQuestions = [], forceAllPatterns = false) {
       let problemData = null;
-      for (let attempt = 0; attempt < 10; attempt++) {
-        const gen = pick(problemGenerators);
+      const stageInfo = getCurrentStageInfo(correctCount);
+      const targetIndices = forceAllPatterns
+        ? problemGenerators.map((_, i) => i)
+        : stageInfo.indices;
+
+      for (let attempt = 0; attempt < 12; attempt++) {
+        const genIndex = pick(targetIndices);
+        const gen = problemGenerators[genIndex];
         const raw = gen();
         if (!excludeQuestions.includes(raw.question)) {
           problemData = raw;
@@ -1023,7 +1065,7 @@
     }
 
     /**************************************************************
-     * 4. ゲーム進行＆3枠独立更新ロジック
+     * 4. ゲーム進行＆2枠独立更新ロジック
      **************************************************************/
     function switchScreen(screenId) {
       const screens = ['screen-home', 'screen-study', 'screen-game', 'screen-result', 'screen-print'];
@@ -1031,9 +1073,6 @@
         document.getElementById(id).classList.add('hidden');
       });
       document.getElementById(screenId).classList.remove('hidden');
-      if (screenId !== 'screen-result') {
-        stopConfetti();
-      }
     }
 
     function showHome() {
@@ -1045,11 +1084,11 @@
         if (s.timeoutId) clearTimeout(s.timeoutId);
         s.waiting = false;
       });
-      document.getElementById('global-freeze-overlay').classList.add('hidden');
+      stopConfetti();
       switchScreen('screen-home');
     }
 
-    function startGame(seconds) {
+    function startGame(modeOrSeconds) {
       const nameInput = document.getElementById('player-name');
       playerName = nameInput.value.trim();
       if (!playerName) {
@@ -1060,8 +1099,18 @@
       localStorage.setItem('denki_master_player_name', playerName);
 
       initAudio();
-      gameDuration = seconds;
-      timeLeft = seconds;
+      if (modeOrSeconds === 'timetrial') {
+        isTimeTrial = true;
+        gameDuration = 0;
+        timeLeft = 0;
+        elapsedSeconds = 0;
+      } else {
+        isTimeTrial = false;
+        gameDuration = modeOrSeconds;
+        timeLeft = modeOrSeconds;
+        elapsedSeconds = 0;
+      }
+
       score = 0;
       combo = 0;
       maxCombo = 0;
@@ -1074,8 +1123,11 @@
 
       Object.keys(categoryStats).forEach(k => categoryStats[k].miss = 0);
 
-      document.getElementById('hint-bar').classList.add('hidden');
       document.getElementById('global-freeze-overlay').classList.add('hidden');
+      const timerLabelText = isTimeTrial ? '経過タイム' : '残り時間';
+      document.getElementById('game-timer-label').textContent = timerLabelText;
+      document.getElementById('freeze-timer-label').textContent = timerLabelText;
+
       updateStatusUI();
       updateTimerUI();
 
@@ -1086,6 +1138,7 @@
       for (let i = 0; i < 2; i++) {
         if (slots[i].timeoutId) clearTimeout(slots[i].timeoutId);
         slots[i].waiting = false;
+        hintPenaltySlots[i] = false;
         document.getElementById(`slot-wait-${i}`).classList.add('hidden');
         loadNewProblemIntoSlot(i, false);
       }
@@ -1093,10 +1146,15 @@
       if (timerInterval) clearInterval(timerInterval);
       timerInterval = setInterval(() => {
         if (!isPlaying) return;
-        timeLeft--;
-        updateTimerUI();
-        if (timeLeft <= 0) {
-          finishGame();
+        if (isTimeTrial) {
+          elapsedSeconds++;
+          updateTimerUI();
+        } else {
+          timeLeft--;
+          updateTimerUI();
+          if (timeLeft <= 0) {
+            finishGame();
+          }
         }
       }, 1000);
     }
@@ -1108,12 +1166,12 @@
         .map((s, idx) => (idx !== slotIndex && s.problem ? s.problem.question : null))
         .filter(Boolean);
 
-      const newProb = createRandomProblem(otherQuestions);
+      const newProb = createRandomProblem(otherQuestions, false);
       slots[slotIndex].problem = newProb;
       slots[slotIndex].waiting = false;
+      hintPenaltySlots[slotIndex] = false; // 新しい問題が出たらその枠のヒント状態をリセット
 
       const waitEl = document.getElementById(`slot-wait-${slotIndex}`);
-      const qEl = document.getElementById(`slot-q-${slotIndex}`);
       const optsEl = document.getElementById(`slot-opts-${slotIndex}`);
       const containerEl = document.getElementById(`slot-container-${slotIndex}`);
 
@@ -1141,10 +1199,30 @@
       if (!prob) return;
       const qEl = document.getElementById(`slot-q-${slotIndex}`);
       const numBadge = ['①', '②'][slotIndex];
-      const penaltyBadge = hintPenaltySlots[slotIndex]
-        ? `<span class="ml-3 text-sm bg-amber-500 text-white px-3 py-1 rounded-full align-middle shadow">💡ヒント使用(得点半分)</span>`
-        : '';
-      qEl.innerHTML = `<span>【問${numBadge}】 ${prob.question}${penaltyBadge}</span>`;
+
+      if (hintPenaltySlots[slotIndex]) {
+        // ヒントボタンを押した後の表示（その問題の式だけを表示）
+        qEl.innerHTML = `
+          <div class="w-full flex flex-col items-center justify-center gap-1.5">
+            <div class="leading-snug">【問${numBadge}】 ${prob.question}</div>
+            <div class="bg-amber-100 border-2 border-amber-500 text-amber-950 px-5 py-1 rounded-xl text-xl md:text-2xl font-black shadow-sm flex items-center gap-3">
+              <span>💡 使う式： ${prob.formula}</span>
+              <span class="text-xs bg-amber-600 text-white px-2.5 py-0.5 rounded-full">得点半分</span>
+            </div>
+          </div>
+        `;
+      } else {
+        // 通常表示（問題文の横に個別ヒントボタンを設置）
+        qEl.innerHTML = `
+          <div class="w-full flex items-center justify-between gap-4">
+            <div class="flex-1 text-center leading-snug">【問${numBadge}】 ${prob.question}</div>
+            <button onclick="activateSlotHint(${slotIndex})" class="shrink-0 bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-900 border-2 border-amber-700 font-black px-4 py-2 rounded-xl shadow-md transition flex flex-col items-center justify-center leading-tight">
+              <span class="text-lg md:text-xl">💡ヒント</span>
+              <span class="text-[11px] font-bold text-amber-950">式を見る(点半分)</span>
+            </button>
+          </div>
+        `;
+      }
     }
 
     function handleAnswerTap(slotIndex, isCorrect) {
@@ -1163,14 +1241,15 @@
         let gained = 100 + (combo - 1) * 25;
         if (hintPenaltySlots[slotIndex]) {
           gained = Math.floor(gained / 2);
-          hintPenaltySlots[slotIndex] = false; // 解いた枠のヒントペナルティを消化
+          hintPenaltySlots[slotIndex] = false;
         }
         score += gained;
         updateStatusUI();
 
-        // 両方の枠でヒントペナルティが消化されたらヒントバーを閉じる
-        if (!hintPenaltySlots.some(Boolean)) {
-          document.getElementById('hint-bar').classList.add('hidden');
+        // タイムトライアルモードで全ステージ（18問）クリアに達したら即座にフィニッシュ！
+        if (isTimeTrial && correctCount >= TIME_TRIAL_TARGET) {
+          finishGame();
+          return;
         }
 
         // 正解した枠を2秒間「お休み（空白）状態」にしてもう片方の問題へ視線を誘導
@@ -1179,7 +1258,7 @@
 
         if (slots[slotIndex].timeoutId) clearTimeout(slots[slotIndex].timeoutId);
         slots[slotIndex].timeoutId = setTimeout(() => {
-          if (!isPlaying) return; // 終了間際にタイムアップしていた場合はキャンセル
+          if (!isPlaying) return; // 終了間際に終了していた場合はキャンセル
           loadNewProblemIntoSlot(slotIndex, true);
         }, 2000);
 
@@ -1244,18 +1323,11 @@
       }, 4000);
     }
 
-    // 救済ヒントボタン発動（現在表示されている2問、または待機中の次問のスコアが半分になる）
-    function activateHint() {
-      if (!isPlaying || isGlobalFrozen) return;
-      hintPenaltySlots = [true, true];
-      document.getElementById('hint-bar').classList.remove('hidden');
-
-      // 現在表示中の問題文に「ヒント使用」バッジを即時反映（2秒待機中の枠は次に出る問題に自動引き継ぎ）
-      for (let i = 0; i < 2; i++) {
-        if (slots[i].problem && !slots[i].waiting) {
-          renderSlotQuestionText(i);
-        }
-      }
+    // 各問題枠ごとの個別ヒントボタン発動（押した問題の式だけを表示し、その問題の得点を半分にする）
+    function activateSlotHint(slotIndex) {
+      if (!isPlaying || isGlobalFrozen || slots[slotIndex].waiting) return;
+      hintPenaltySlots[slotIndex] = true;
+      renderSlotQuestionText(slotIndex);
     }
 
     function updateStatusUI() {
@@ -1269,18 +1341,31 @@
         badge.classList.add('scale-90', 'opacity-40');
         badge.classList.remove('scale-105', 'opacity-100');
       }
+
+      // ステージ表示の更新
+      const stageInfo = getCurrentStageInfo(correctCount);
+      const stageTextEl = document.getElementById('game-stage-text');
+      if (stageTextEl) {
+        if (isTimeTrial) {
+          const remain = Math.max(0, TIME_TRIAL_TARGET - correctCount);
+          stageTextEl.textContent = `${stageInfo.title} （クリアまで残り${remain}問）`;
+        } else {
+          stageTextEl.textContent = stageInfo.title;
+        }
+      }
     }
 
     function updateTimerUI() {
-      const m = String(Math.floor(timeLeft / 60)).padStart(2, '0');
-      const s = String(timeLeft % 60).padStart(2, '0');
+      const targetSec = isTimeTrial ? elapsedSeconds : timeLeft;
+      const m = String(Math.floor(targetSec / 60)).padStart(2, '0');
+      const s = String(targetSec % 60).padStart(2, '0');
       const timeStr = `${m}:${s}`;
       const timerEl = document.getElementById('game-timer');
       const freezeMirrorEl = document.getElementById('freeze-timer-mirror');
       timerEl.textContent = timeStr;
       if (freezeMirrorEl) freezeMirrorEl.textContent = timeStr;
 
-      if (timeLeft <= 10) {
+      if (!isTimeTrial && timeLeft <= 10) {
         timerEl.classList.remove('text-cyan-400');
         timerEl.classList.add('text-rose-500', 'animate-pulse');
       } else {
@@ -1290,7 +1375,7 @@
     }
 
     /**************************************************************
-     * 5. リザルト画面 ＆ 多段階ランク演出（2枠＋2秒ディレイ用に最適化）
+     * 5. リザルト画面 ＆ 多段階ランク演出（3分・5分・タイムトライアル対応）
      **************************************************************/
     function finishGame() {
       isPlaying = false;
@@ -1307,35 +1392,65 @@
       switchScreen('screen-result');
 
       // モードと名前・現在日時の表示
-      const minLabel = Math.floor(gameDuration / 60) + "分モード";
-      document.getElementById('res-mode-badge').textContent = minLabel;
+      const modeLabel = isTimeTrial
+        ? "タイムトライアル(全18問制覇)"
+        : Math.floor(gameDuration / 60) + "分モード";
+      document.getElementById('res-mode-badge').textContent = modeLabel;
       document.getElementById('res-player-name').textContent = playerName;
 
       const now = new Date();
       const dateStr = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
       document.getElementById('res-datetime').textContent = dateStr;
 
-      document.getElementById('res-score').textContent = score.toLocaleString();
+      const metricLabelEl = document.getElementById('res-main-metric-label');
+      const resScoreEl = document.getElementById('res-score');
+
+      if (isTimeTrial) {
+        const m = Math.floor(elapsedSeconds / 60);
+        const s = String(elapsedSeconds % 60).padStart(2, '0');
+        metricLabelEl.textContent = `全ステージ制覇タイム （SCORE: ${score.toLocaleString()}）`;
+        resScoreEl.textContent = `${m}分${s}秒`;
+      } else {
+        metricLabelEl.textContent = "獲得スコア";
+        resScoreEl.textContent = score.toLocaleString();
+      }
+
       document.getElementById('res-correct').textContent = `${correctCount}問`;
       document.getElementById('res-max-combo').textContent = maxCombo;
       document.getElementById('res-miss').textContent = `${missCount}回`;
 
-      // 2枠＋2秒ディレイのリズムに合わせて調整した8段階の豪華ランク判定
-      const timeFactor = gameDuration / 60; // 1分=1, 2分=2, 3分=3
-      const normalizedScore = score / timeFactor;
+      let achieved = null;
 
-      const ranks = [
-        { min: 3600, icon: "🌌👑⚡", title: "【神域】ニコラ・テスラ級", msg: "人類の限界を超える超光速の頭脳！電気の世界を完全に極めた伝説の覇者です！！", style: "bg-gradient-to-r from-fuchsia-600 via-amber-500 to-cyan-500 border-yellow-200 text-white", confetti: 220 },
-        { min: 2800, icon: "👑⚡✨", title: "【伝説】エジソン級 電撃王", msg: "圧倒的なひらめきと無双の計算力！クラス誰もが驚く天才発明家レベルです！", style: "bg-gradient-to-r from-amber-500 via-yellow-500 to-orange-500 border-white text-slate-950", confetti: 160 },
-        { min: 2100, icon: "🐉⚡", title: "【SSS】雷神（らいじん）", msg: "カミナリのような凄まじい判断スピード！テストでも満点間違いなしの実力！", style: "bg-gradient-to-r from-indigo-600 to-purple-600 border-amber-300 text-white", confetti: 120 },
-        { min: 1500, icon: "💎⚡", title: "【SS】超電導グランドマスター", msg: "抵抗ゼロのスムーズな思考回路！公式の使い分けが完全に身についています！", style: "bg-gradient-to-r from-cyan-600 to-blue-700 border-cyan-200 text-white", confetti: 80 },
-        { min: 1000, icon: "🏆✨", title: "【S】オームの貴公子・姫", msg: "素晴らしい高得点！単位変換や応用問題にも落ち着いて対応できています！", style: "bg-emerald-700 border-emerald-300 text-white", confetti: 50 },
-        { min: 650, icon: "🥇", title: "【A】熟練の電気エンジニア", msg: "基本の公式がしっかり定着しています！さらなる連続コンボでSランクを目指そう！", style: "bg-blue-800 border-blue-400 text-white", confetti: 25 },
-        { min: 300, icon: "🥈", title: "【B】駆け出し電気技師", msg: "公式の使い方がわかってきました！ミスを減らしてコンボをつなげると一気に伸びます！", style: "bg-slate-800 border-slate-500 text-white", confetti: 0 },
-        { min: 0, icon: "🌱", title: "【C】電気見習いチャレンジャー", msg: "まずは勉強モード（赤シート）で公式を復習してから、もう一度挑戦してみよう！", style: "bg-slate-800 border-slate-600 text-slate-200", confetti: 0 }
-      ];
+      if (isTimeTrial) {
+        // タイムトライアル用ランク判定（全18問クリアにかかった秒数で判定）
+        const timeRanks = [
+          { maxSec: 75, icon: "🌌👑⚡", title: "【神域】ニコラ・テスラ級", msg: "1分15秒以内で全ステージ完全制覇！人類の限界を超える超光速の頭脳です！！", style: "bg-gradient-to-r from-fuchsia-600 via-amber-500 to-cyan-500 border-yellow-200 text-white", confetti: 220 },
+          { maxSec: 95, icon: "👑⚡✨", title: "【伝説】エジソン級 電撃王", msg: "圧倒的なスピードで全18問を突破！クラス誰もが驚く天才発明家レベルです！", style: "bg-gradient-to-r from-amber-500 via-yellow-500 to-orange-500 border-white text-slate-950", confetti: 160 },
+          { maxSec: 120, icon: "🐉⚡", title: "【SSS】雷神（らいじん）", msg: "2分以内のスピード制覇！カミナリのような判断力でテストも満点間違いなし！", style: "bg-gradient-to-r from-indigo-600 to-purple-600 border-amber-300 text-white", confetti: 120 },
+          { maxSec: 150, icon: "💎⚡", title: "【SS】超電導グランドマスター", msg: "抵抗ゼロのスムーズな思考回路！全6ステージの公式が完全に身についています！", style: "bg-gradient-to-r from-cyan-600 to-blue-700 border-cyan-200 text-white", confetti: 80 },
+          { maxSec: 180, icon: "🏆✨", title: "【S】オームの貴公子・姫", msg: "3分以内で全ステージ制覇！単位変換や直列・並列回路にもバッチリ対応できています！", style: "bg-emerald-700 border-emerald-300 text-white", confetti: 50 },
+          { maxSec: 240, icon: "🥇", title: "【A】熟練の電気エンジニア", msg: "最後までしっかり解き切りました！ミスを減らせばさらにタイムが縮まります！", style: "bg-blue-800 border-blue-400 text-white", confetti: 25 },
+          { maxSec: 99999, icon: "🥈", title: "【B】完走チャレンジャー", msg: "全ステージ18問クリア達成！もう一度挑戦して自己ベストタイムを更新しよう！", style: "bg-slate-800 border-slate-500 text-white", confetti: 15 }
+        ];
+        achieved = timeRanks.find(r => elapsedSeconds <= r.maxSec) || timeRanks[timeRanks.length - 1];
+      } else {
+        // 3分モード・5分モード用のランク判定（1分あたりスコア換算）
+        const timeFactor = gameDuration / 60;
+        const normalizedScore = score / timeFactor;
 
-      const achieved = ranks.find(r => normalizedScore >= r.min) || ranks[ranks.length - 1];
+        const ranks = [
+          { min: 3600, icon: "🌌👑⚡", title: "【神域】ニコラ・テスラ級", msg: "人類の限界を超える超光速の頭脳！電気の世界を完全に極めた伝説の覇者です！！", style: "bg-gradient-to-r from-fuchsia-600 via-amber-500 to-cyan-500 border-yellow-200 text-white", confetti: 220 },
+          { min: 2800, icon: "👑⚡✨", title: "【伝説】エジソン級 電撃王", msg: "圧倒的なひらめきと無双の計算力！クラス誰もが驚く天才発明家レベルです！", style: "bg-gradient-to-r from-amber-500 via-yellow-500 to-orange-500 border-white text-slate-950", confetti: 160 },
+          { min: 2100, icon: "🐉⚡", title: "【SSS】雷神（らいじん）", msg: "カミナリのような凄まじい判断スピード！テストでも満点間違いなしの実力！", style: "bg-gradient-to-r from-indigo-600 to-purple-600 border-amber-300 text-white", confetti: 120 },
+          { min: 1500, icon: "💎⚡", title: "【SS】超電導グランドマスター", msg: "抵抗ゼロのスムーズな思考回路！公式の使い分けが完全に身についています！", style: "bg-gradient-to-r from-cyan-600 to-blue-700 border-cyan-200 text-white", confetti: 80 },
+          { min: 1000, icon: "🏆✨", title: "【S】オームの貴公子・姫", msg: "素晴らしい高得点！単位変換や応用問題にも落ち着いて対応できています！", style: "bg-emerald-700 border-emerald-300 text-white", confetti: 50 },
+          { min: 650, icon: "🥇", title: "【A】熟練の電気エンジニア", msg: "基本の公式がしっかり定着しています！さらなる連続コンボでSランクを目指そう！", style: "bg-blue-800 border-blue-400 text-white", confetti: 25 },
+          { min: 300, icon: "🥈", title: "【B】駆け出し電気技師", msg: "公式の使い方がわかってきました！ミスを減らしてコンボをつなげると一気に伸びます！", style: "bg-slate-800 border-slate-500 text-white", confetti: 0 },
+          { min: 0, icon: "🌱", title: "【C】電気見習いチャレンジャー", msg: "まずは勉強モード（赤シート）で公式を復習してから、もう一度挑戦してみよう！", style: "bg-slate-800 border-slate-600 text-slate-200", confetti: 0 }
+        ];
+        achieved = ranks.find(r => normalizedScore >= r.min) || ranks[ranks.length - 1];
+      }
+
       const rankBox = document.getElementById('res-rank-box');
       rankBox.className = `md:col-span-7 rounded-2xl p-5 text-center border-4 flex flex-col items-center justify-center space-y-2 shadow-xl ${achieved.style}`;
       document.getElementById('res-rank-icon').textContent = achieved.icon;
@@ -1416,7 +1531,7 @@
       }
 
       while (printProblems.length < 20) {
-        printProblems.push(createRandomProblem());
+        printProblems.push(createRandomProblem([], true));
       }
 
       const qGrid = document.getElementById('print-questions-grid');
