@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>中2理科 電気公式マスター</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800;900&display=swap');
+
+    body {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    /* スクリーンショット風のカラーテーマ（視認性とコントラストを強化） */
+    .slot-0-bg { background-color: #9ec5fe; border-color: #0d47a1; }
+    .slot-0-btn { background-color: #cfe2ff; border-color: #0d47a1; color: #052c65; }
+    .slot-0-btn:active { background-color: #6ea8fe; }
+
+    .slot-1-bg { background-color: #f8c6aa; border-color: #7f2b0a; }
+    .slot-1-btn { background-color: #fce5d8; border-color: #7f2b0a; color: #581c04; }
+    .slot-1-btn:active { background-color: #f3a678; }
+
+    .slot-2-bg { background-color: #b5e7b8; border-color: #0f5132; }
+    .slot-2-btn { background-color: #d8f3dc; border-color: #0f5132; color: #072a19; }
+    .slot-2-btn:active { background-color: #8ce092; }
+
+    /* 赤シート機能 */
+    .red-sheet-hidden {
+      background-color: #ef4444;
+      color: transparent;
+      border-radius: 0.375rem;
+      padding: 0.1rem 0.6rem;
+      cursor: pointer;
+      display: inline-block;
+      border: 2px solid #dc2626;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+      transition: all 0.2s ease;
+      vertical-align: middle;
+    }
+    .red-sheet-hidden::after {
+      content: "タップで表示";
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 0.75rem;
+      font-weight: bold;
+      display: block;
+      line-height: 1.2;
+    }
+    .red-sheet-revealed {
+      background-color: #fef2f2;
+      color: #dc2626;
+      border-radius: 0.375rem;
+      padding: 0.1rem 0.6rem;
+      cursor: pointer;
+      display: inline-block;
+      border: 2px dashed #ef4444;
+      font-weight: 900;
+      transition: all 0.2s ease;
+    }
+
+    /* アニメーション */
+    @keyframes popIn {
+      0% { transform: scale(0.96); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop {
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes fadeInGentle {
+      0% { opacity: 0; transform: translateY(10px) scale(0.98); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .animate-fade-in {
+      animation: fadeInGentle 0.5s ease-out forwards;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-10px); }
+      40%, 80% { transform: translateX(10px); }
+    }
+    .animate-shake {
+      animation: shake 0.4s ease-in-out;
+    }
+
+    @keyframes shrinkBar {
+      from { width: 100%; }
+      to { width: 0%; }
+    }
+    .freeze-bar {
+      animation: shrinkBar 4s linear forwards;
+    }
+
+    /* 印刷用スタイル（A4小テスト出力） */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #screen-print, #screen-print * {
+        visibility: visible;
+      }
+      #screen-print {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-page-break {
+        page-break-before: always;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-800 h-screen w-screen overflow-hidden flex flex-col">
+
+  <!-- 紙吹雪エフェクト用キャンバス -->
+  <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
+
+  <!-- ==================== 1. ホーム画面 ==================== -->
+  <div id="screen-home" class="flex-1 flex flex-col justify-between p-6 bg-gradient-to-br from-slate-800 via-blue-950 to-slate-900 text-white overflow-y-auto">
+    <div class="max-w-5xl w-full mx-auto my-auto flex flex-col gap-6">
+      
+      <!-- タイトルヘッダー -->
+      <div class="text-center space-y-2">
+        <div class="inline-block bg-amber-400 text-slate-900 font-black px-4 py-1 rounded-full text-sm tracking-wider shadow">
+          中学2年理科 第1分野（電気・電流と回路）
+        </div>
+        <h1 class="text-5xl md:text-6xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-200 to-cyan-300 drop-shadow">
+          ⚡ 電気公式マスター ⚡
+        </h1>
+        <p class="text-blue-200 text-lg font-bold">問題文から使う公式を瞬時に判断！制限時間内に何問解けるか挑戦しよう！</p>
+      </div>
+
+      <!-- 名前入力エリア -->
+      <div class="bg-white/10 backdrop-blur-md border-2 border-white/20 rounded-2xl p-5 max-w-2xl mx-auto w-full shadow-xl">
+        <label for="player-name" class="block text-xl font-extrabold text-amber-300 mb-2 text-center">
+          ✏️ あなたの名前（クラス・番号・氏名）を入力してください
+        </label>
+        <input 
+          type="text" 
+          id="player-name" 
+          placeholder="例：2年1組 15番 理科太郎" 
+          class="w-full text-center text-2xl md:text-3xl font-black text-slate-900 bg-white rounded-xl px-4 py-3 border-4 border-amber-400 focus:outline-none focus:ring-4 focus:ring-amber-300"
+        >
+        <p id="name-warning" class="text-rose-400 font-bold text-center mt-2 hidden animate-bounce">
+          ⚠️ ゲームを始める前に名前を入力してください！
+        </p>
+      </div>
+
+      <!-- 時間選択＆ゲームスタートボタン -->
+      <div class="space-y-3">
+        <h2 class="text-center text-2xl font-extrabold text-cyan-300">⏱️ 制限時間を選んでスタート！</h2>
+        <div class="grid grid-cols-3 gap-5 max-w-4xl mx-auto">
+          <button onclick="startGame(60)" class="group relative bg-gradient-to-b from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-white rounded-2xl p-5 border-b-8 border-blue-800 active:border-b-0 active:translate-y-2 transition-all shadow-xl">
+            <div class="text-4xl font-black mb-1">1分モード</div>
+            <div class="text-sm font-bold text-cyan-100">スピード決戦！短期集中</div>
+          </button>
+          <button onclick="startGame(120)" class="group relative bg-gradient-to-b from-emerald-400 to-green-600 hover:from-emerald-300 hover:to-green-500 text-white rounded-2xl p-5 border-b-8 border-green-800 active:border-b-0 active:translate-y-2 transition-all shadow-xl">
+            <div class="text-4xl font-black mb-1">2分モード</div>
+            <div class="text-sm font-bold text-emerald-100">標準バランス！実力試し</div>
+          </button>
+          <button onclick="startGame(180)" class="group relative bg-gradient-to-b from-amber-400 to-orange-600 hover:from-amber-300 hover:to-orange-500 text-white rounded-2xl p-5 border-b-8 border-orange-800 active:border-b-0 active:translate-y-2 transition-all shadow-xl">
+            <div class="text-4xl font-black mb-1">3分モード</div>
+            <div class="text-sm font-bold text-amber-100">持久力＆超高得点バトル！</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- サブモード（勉強モード・プリント作成） -->
+      <div class="grid grid-cols-2 gap-5 max-w-4xl mx-auto w-full pt-2">
+        <button onclick="showStudyMode()" class="flex items-center justify-center gap-3 bg-rose-600 hover:bg-rose-500 text-white font-black text-2xl py-4 px-6 rounded-2xl border-b-4 border-rose-800 active:border-b-0 active:translate-y-1 transition shadow-lg">
+          <span>📕 勉強モード（赤シート解説）</span>
+        </button>
+        <button onclick="openPrintScreen('random')" class="flex items-center justify-center gap-3 bg-slate-200 hover:bg-white text-slate-900 font-black text-2xl py-4 px-6 rounded-2xl border-b-4 border-slate-400 active:border-b-0 active:translate-y-1 transition shadow-lg">
+          <span>🖨️ 手書き用プリント作成 (20問)</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== 2. 勉強モード（赤シート画面） ==================== -->
+  <div id="screen-study" class="hidden flex-1 flex flex-col bg-slate-100 overflow-hidden">
+    <!-- ヘッダー -->
+    <div class="bg-rose-600 text-white px-6 py-3 flex items-center justify-between shadow-md shrink-0">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl font-black">📕 公式＆計算法マスター（赤シート学習）</span>
+        <span class="bg-rose-800 text-xs font-bold px-3 py-1 rounded-full">赤い部分をタップすると答えが出ます</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="toggleAllRedSheets(true)" class="bg-white/20 hover:bg-white/30 text-white font-bold px-3 py-1.5 rounded-lg text-sm">すべて表示</button>
+        <button onclick="toggleAllRedSheets(false)" class="bg-rose-900 hover:bg-rose-950 text-white font-bold px-3 py-1.5 rounded-lg text-sm">すべて隠す</button>
+        <button onclick="showHome()" class="bg-white text-rose-700 font-black px-5 py-1.5 rounded-xl shadow hover:bg-rose-50">ホームへ戻る</button>
+      </div>
+    </div>
+
+    <!-- コンテンツ（スクロール可） -->
+    <div class="flex-1 overflow-y-auto p-6 space-y-6 max-w-6xl mx-auto w-full text-lg">
+      
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- 1. オームの法則 -->
+        <div class="bg-white rounded-2xl p-5 shadow border-t-8 border-blue-600 space-y-3">
+          <h3 class="text-2xl font-black text-blue-800 border-b pb-2">① オームの法則</h3>
+          <p class="font-bold text-slate-600 text-base">電圧(V)・電流(A)・抵抗(Ω)の関係を表す最も基本の公式です。</p>
+          <ul class="space-y-3 font-bold text-xl">
+            <li>・電圧(V) ＝ <span class="red-sheet" onclick="toggleSheet(this)">抵抗(R) × 電流(I)</span> （公式：<span class="red-sheet" onclick="toggleSheet(this)">V ＝ R I</span>）</li>
+            <li>・抵抗(Ω) ＝ <span class="red-sheet" onclick="toggleSheet(this)">電圧(V) ÷ 電流(I)</span> （公式：<span class="red-sheet" onclick="toggleSheet(this)">R ＝ V / I</span>）</li>
+            <li>・電流(A) ＝ <span class="red-sheet" onclick="toggleSheet(this)">電圧(V) ÷ 抵抗(R)</span> （公式：<span class="red-sheet" onclick="toggleSheet(this)">I ＝ V / R</span>）</li>
+          </ul>
+          <div class="bg-blue-50 p-3 rounded-xl text-base font-bold text-blue-900">
+            💡 例題：抵抗4Ωに3Aの電流が流れているとき、電圧は <span class="red-sheet" onclick="toggleSheet(this)">4 × 3 ＝ 12 V</span> になる。
+          </div>
+        </div>
+
+        <!-- 2. 電力の公式 -->
+        <div class="bg-white rounded-2xl p-5 shadow border-t-8 border-amber-500 space-y-3">
+          <h3 class="text-2xl font-black text-amber-700 border-b pb-2">② 電力（W：ワット）</h3>
+          <p class="font-bold text-slate-600 text-base">1秒あたりに消費される電気エネルギーの大きさを表します。</p>
+          <ul class="space-y-3 font-bold text-xl">
+            <li>・電力(W) ＝ <span class="red-sheet" onclick="toggleSheet(this)">電圧(V) × 電流(I)</span> （公式：<span class="red-sheet" onclick="toggleSheet(this)">P ＝ V I</span>）</li>
+            <li>・電圧(V) ＝ <span class="red-sheet" onclick="toggleSheet(this)">電力(P) ÷ 電流(I)</span> （公式：<span class="red-sheet" onclick="toggleSheet(this)">V ＝ P / I</span>）</li>
+            <li>・電流(A) ＝ <span class="red-sheet" onclick="toggleSheet(this)">電力(P) ÷ 電圧(V)</span> （公式：<span class="red-sheet" onclick="toggleSheet(this)">I ＝ P / V</span>）</li>
+          </ul>
+          <div class="bg-amber-50 p-3 rounded-xl text-base font-bold text-amber-900">
+            💡 家電の「100V-600W」表示：100Vで使うと600Wになるので、流れる電流は <span class="red-sheet" onclick="toggleSheet(this)">600 ÷ 100 ＝ 6 A</span> である。
+          </div>
+        </div>
+
+        <!-- 3. 熱量・電力量 -->
+        <div class="bg-white rounded-2xl p-5 shadow border-t-8 border-emerald-600 space-y-3">
+          <h3 class="text-2xl font-black text-emerald-800 border-b pb-2">③ 熱量(J) と 電力量(J / Wh)</h3>
+          <p class="font-bold text-slate-600 text-base">電力(W)に時間を掛けると総エネルギーになります。時間の単位に注意！</p>
+          <ul class="space-y-3 font-bold text-xl">
+            <li>・熱量・電力量(J) ＝ <span class="red-sheet" onclick="toggleSheet(this)">電力(W) × 時間(秒)</span></li>
+            <li>・電力量(Wh) ＝ <span class="red-sheet" onclick="toggleSheet(this)">電力(W) × 時間(時間：h)</span></li>
+            <li>・時間(秒)の逆算 ＝ <span class="red-sheet" onclick="toggleSheet(this)">熱量(J) ÷ 電力(W)</span></li>
+          </ul>
+          <div class="bg-emerald-50 p-3 rounded-xl text-base font-bold text-emerald-900">
+            💡 10Wの電熱線に2分間流したときの熱量は、2分＝<span class="red-sheet" onclick="toggleSheet(this)">120秒</span> なので、<span class="red-sheet" onclick="toggleSheet(this)">10 × 120 ＝ 1200 J</span> になる。
+          </div>
+        </div>
+
+        <!-- 4. 単位変換＆直列・並列回路 -->
+        <div class="bg-white rounded-2xl p-5 shadow border-t-8 border-purple-600 space-y-3">
+          <h3 class="text-2xl font-black text-purple-800 border-b pb-2">④ 単位変換トラップ ＆ 2つの抵抗</h3>
+          <p class="font-bold text-slate-600 text-base">テストで最もひっかかりやすい重要ポイントです！</p>
+          <ul class="space-y-3 font-bold text-xl">
+            <li>・電流の変換：1000mA ＝ <span class="red-sheet" onclick="toggleSheet(this)">1 A</span> 、500mA ＝ <span class="red-sheet" onclick="toggleSheet(this)">0.5 A</span></li>
+            <li>・時間の変換：1分 ＝ <span class="red-sheet" onclick="toggleSheet(this)">60 秒</span> 、3分 ＝ <span class="red-sheet" onclick="toggleSheet(this)">180 秒</span></li>
+            <li>・直列回路の全体の抵抗 ＝ <span class="red-sheet" onclick="toggleSheet(this)">抵抗1 ＋ 抵抗2（足し算）</span></li>
+            <li>・同じ抵抗2つの並列回路 ＝ <span class="red-sheet" onclick="toggleSheet(this)">1つ分の半分（÷2）</span></li>
+          </ul>
+          <div class="bg-purple-50 p-3 rounded-xl text-base font-bold text-purple-900">
+            💡 20Ωの抵抗2つを並列につなぐと全体の抵抗は <span class="red-sheet" onclick="toggleSheet(this)">10 Ω</span> になる。
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== 3. メインゲーム画面 ==================== -->
+  <div id="screen-game" class="hidden flex-1 flex flex-col bg-slate-900 overflow-hidden relative">
+    
+    <!-- 上部ステータスバー -->
+    <div class="bg-slate-800 border-b-2 border-slate-700 px-4 py-2 flex items-center justify-between text-white shrink-0 h-16">
+      <div class="flex items-center gap-6">
+        <!-- 残り時間 -->
+        <div class="flex items-center gap-2 bg-slate-900 px-4 py-1.5 rounded-xl border border-slate-600">
+          <span class="text-slate-400 font-bold text-sm">残り時間</span>
+          <span id="game-timer" class="text-3xl font-black text-cyan-400 tabular-nums">01:00</span>
+        </div>
+        <!-- スコア -->
+        <div class="flex items-center gap-2 bg-slate-900 px-4 py-1.5 rounded-xl border border-slate-600">
+          <span class="text-slate-400 font-bold text-sm">SCORE</span>
+          <span id="game-score" class="text-3xl font-black text-amber-400 tabular-nums">0</span>
+        </div>
+        <!-- コンボ -->
+        <div id="combo-badge" class="flex items-center gap-1 bg-gradient-to-r from-orange-500 to-rose-500 px-4 py-1 rounded-full font-black text-lg shadow scale-90 opacity-40 transition-all">
+          <span>🔥</span>
+          <span id="game-combo">0</span>
+          <span class="text-xs">COMBO!</span>
+        </div>
+      </div>
+
+      <!-- 右側：救済ヒントボタン ＆ 中断ボタン -->
+      <div class="flex items-center gap-4">
+        <button id="btn-hint" onclick="activateHint()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-black px-4 py-2 rounded-xl shadow flex items-center gap-2 transition active:scale-95">
+          <span>💡 公式チラ見ヒント</span>
+          <span class="text-xs bg-slate-900 text-amber-300 px-2 py-0.5 rounded-md">※現在の2問の得点半分</span>
+        </button>
+        <button onclick="showHome()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold text-xs px-3 py-2 rounded-lg">
+          中断して戻る
+        </button>
+      </div>
+    </div>
+
+    <!-- 公式チラ見オーバーレイバー（ヒント発動時のみ表示） -->
+    <div id="hint-bar" class="hidden bg-amber-100 border-b-4 border-amber-400 text-slate-900 px-4 py-2.5 text-center font-black text-xl flex items-center justify-around shadow-inner shrink-0">
+      <span>【オーム】V＝R×I ／ R＝V÷I ／ I＝V÷R</span>
+      <span>【電力】P(W)＝V×I ／ I＝P÷V</span>
+      <span>【熱量・電力量】J＝W×秒 ／ Wh＝W×時間</span>
+      <span>【単位】1000mA＝1A ／ 1分＝60秒</span>
+    </div>
+
+    <!-- 上下2つの問題枠エリア（交互にテンポよく解くレイアウト） -->
+    <div class="flex-1 grid grid-rows-2 gap-5 p-5 bg-slate-100 overflow-hidden relative">
+      
+      <!-- 問題枠 ①（上枠・青系） -->
+      <div id="slot-container-0" class="relative flex flex-col gap-3 h-full">
+        <div id="slot-q-0" class="slot-0-bg border-4 flex-1 flex items-center justify-center px-8 text-center text-3xl md:text-4xl font-black text-slate-900 rounded-2xl shadow-md leading-snug">
+          問題文①
+        </div>
+        <div id="slot-opts-0" class="grid grid-cols-4 gap-4 h-[48%]">
+          <!-- JSで選択肢4つを描画 -->
+        </div>
+        <!-- 正解後の2秒ディレイ（お休み状態）表示 -->
+        <div id="slot-wait-0" class="hidden absolute inset-0 bg-blue-50/90 border-4 border-dashed border-blue-300 rounded-2xl flex flex-col items-center justify-center z-10">
+          <div class="text-4xl font-black text-blue-600 animate-bounce">⭕ ナイス正解！！</div>
+          <div class="text-lg font-bold text-slate-500 mt-1">下の問題を解こう！（次の問題を準備中…）</div>
+        </div>
+      </div>
+
+      <!-- 問題枠 ②（下枠・オレンジ系） -->
+      <div id="slot-container-1" class="relative flex flex-col gap-3 h-full">
+        <div id="slot-q-1" class="slot-1-bg border-4 flex-1 flex items-center justify-center px-8 text-center text-3xl md:text-4xl font-black text-slate-900 rounded-2xl shadow-md leading-snug">
+          問題文②
+        </div>
+        <div id="slot-opts-1" class="grid grid-cols-4 gap-4 h-[48%]">
+          <!-- JSで選択肢4つを描画 -->
+        </div>
+        <!-- 正解後の2秒ディレイ（お休み状態）表示 -->
+        <div id="slot-wait-1" class="hidden absolute inset-0 bg-orange-50/90 border-4 border-dashed border-orange-300 rounded-2xl flex flex-col items-center justify-center z-10">
+          <div class="text-4xl font-black text-orange-600 animate-bounce">⭕ ナイス正解！！</div>
+          <div class="text-lg font-bold text-slate-500 mt-1">上の問題を解こう！（次の問題を準備中…）</div>
+        </div>
+      </div>
+
+      <!-- お手つき時の全画面4秒フリーズ＆特大解説オーバーレイ -->
+      <div id="global-freeze-overlay" class="hidden absolute inset-0 bg-rose-950/95 backdrop-blur-md text-white flex flex-col justify-between p-8 border-8 border-rose-500 z-40">
+        <div class="flex items-center justify-between border-b-2 border-rose-700 pb-4">
+          <div class="flex items-center gap-3">
+            <span class="bg-rose-600 text-white font-black px-5 py-2 rounded-xl text-2xl shadow">❌ お手つき！4秒間フリーズ中</span>
+            <span class="text-rose-200 font-bold text-lg">※フリーズ中も残り時間は減り続けます！正しい解き方を確認しよう！</span>
+          </div>
+          <div class="bg-slate-900/90 border-2 border-rose-400 px-5 py-2 rounded-xl flex items-center gap-2">
+            <span class="text-rose-300 font-bold text-sm">残り時間</span>
+            <span id="freeze-timer-mirror" class="text-3xl font-black text-rose-400 tabular-nums">01:00</span>
+          </div>
+        </div>
+
+        <div id="global-freeze-content" class="my-auto max-w-4xl mx-auto w-full bg-slate-900/90 border-4 border-amber-400 rounded-3xl p-8 text-center space-y-5 shadow-2xl">
+          <!-- JSで間違えた問題・正しい公式・計算式を特大表示 -->
+        </div>
+
+        <div class="space-y-2 max-w-4xl mx-auto w-full">
+          <div class="text-center text-rose-200 font-bold text-base">再開までお待ちください...</div>
+          <div class="w-full bg-rose-900 h-5 rounded-full overflow-hidden border-2 border-rose-400 p-0.5">
+            <div id="global-freeze-bar" class="bg-gradient-to-r from-amber-400 to-yellow-300 h-full rounded-full"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== 4. リザルト（結果）画面 ==================== -->
+  <div id="screen-result" class="hidden flex-1 flex flex-col justify-between p-6 bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900 text-white relative overflow-y-auto">
+    
+    <!-- 誤タップ防止：右上の小さなホーム戻りボタン -->
+    <div class="flex justify-between items-start shrink-0">
+      <div class="bg-amber-400/20 border border-amber-400/50 text-amber-200 px-4 py-1.5 rounded-xl font-bold text-sm">
+        📸 スクリーンショット提出用画面
+      </div>
+      <button onclick="showHome()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 text-xs font-bold px-3 py-1.5 rounded-lg shadow z-30">
+        🏠 ホームへ戻る（※スクショ撮影後に押す）
+      </button>
+    </div>
+
+    <!-- メイン結果ボード -->
+    <div class="max-w-5xl w-full mx-auto my-auto bg-white/10 backdrop-blur-md border-2 border-white/20 rounded-3xl p-6 shadow-2xl space-y-5">
+      
+      <!-- プレイヤー名・モード・日時（不正防止証明） -->
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/20 pb-4">
+        <div class="flex items-center gap-3">
+          <span class="bg-cyan-500 text-slate-950 font-black px-3 py-1 rounded-lg text-sm" id="res-mode-badge">1分モード</span>
+          <h2 id="res-player-name" class="text-3xl md:text-4xl font-black text-white tracking-wide">2年1組 理科太郎</h2>
+        </div>
+        <div class="text-right">
+          <div class="text-xs text-slate-300 font-bold">プレイ完了日時</div>
+          <div id="res-datetime" class="text-xl md:text-2xl font-black text-amber-300 tabular-nums">2026/11/15 12:34:56</div>
+        </div>
+      </div>
+
+      <!-- スコア ＆ ランク称号演出 -->
+      <div class="grid md:grid-cols-12 gap-6 items-center">
+        
+        <!-- 左：ランク・称号 -->
+        <div id="res-rank-box" class="md:col-span-7 rounded-2xl p-5 text-center border-4 flex flex-col items-center justify-center space-y-2 shadow-inner">
+          <div id="res-rank-icon" class="text-6xl">👑</div>
+          <div class="text-sm font-bold uppercase tracking-widest opacity-80">認定ランク・称号</div>
+          <div id="res-rank-title" class="text-4xl md:text-5xl font-black tracking-tight">エジソン級マスター</div>
+          <p id="res-rank-msg" class="text-base font-bold opacity-95">驚異的なひらめきと計算スピード！電気の公式を完全に支配しています！</p>
+        </div>
+
+        <!-- 右：スコア詳細 -->
+        <div class="md:col-span-5 space-y-3">
+          <div class="bg-slate-900/80 rounded-2xl p-4 border border-white/15 text-center">
+            <div class="text-sm font-bold text-slate-400">獲得スコア</div>
+            <div id="res-score" class="text-5xl md:text-6xl font-black text-amber-400 tabular-nums">2,450</div>
+          </div>
+          <div class="grid grid-cols-3 gap-2 text-center">
+            <div class="bg-slate-900/60 rounded-xl p-2.5 border border-white/10">
+              <div class="text-xs font-bold text-slate-400">正解数</div>
+              <div id="res-correct" class="text-2xl font-black text-emerald-400">20問</div>
+            </div>
+            <div class="bg-slate-900/60 rounded-xl p-2.5 border border-white/10">
+              <div class="text-xs font-bold text-slate-400">最大コンボ</div>
+              <div id="res-max-combo" class="text-2xl font-black text-orange-400">15</div>
+            </div>
+            <div class="bg-slate-900/60 rounded-xl p-2.5 border border-white/10">
+              <div class="text-xs font-bold text-slate-400">お手つき</div>
+              <div id="res-miss" class="text-2xl font-black text-rose-400">1回</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ニガテ分析＆復習プリントボタン -->
+      <div class="bg-slate-900/70 rounded-2xl p-4 border border-white/15 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="space-y-1 flex-1">
+          <div class="text-sm font-black text-cyan-300 flex items-center gap-1">
+            <span>📊 AIニガテ分析＆アドバイス</span>
+          </div>
+          <p id="res-analysis" class="text-lg font-bold text-white">
+            すべての公式をバランスよく完璧に使いこなせています！パーフェクト！
+          </p>
+        </div>
+        <button id="btn-review-print" onclick="openPrintScreen('review')" class="shrink-0 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-5 py-3 rounded-xl shadow-lg transition flex items-center gap-2 text-base">
+          <span>📝 今回間違えた問題を含む復習プリントを作成</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- スクリーンショット提出を促す特大バナー -->
+    <div class="max-w-4xl mx-auto w-full bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 text-slate-950 rounded-2xl p-3.5 text-center shadow-xl border-2 border-white shrink-0">
+      <p class="text-xl md:text-2xl font-black flex items-center justify-center gap-2">
+        <span>📸</span>
+        <span>今すぐこの画面をスクリーンショットして、先生に提出しよう！</span>
+      </p>
+    </div>
+
+  </div>
+
+  <!-- ==================== 5. プリント出力画面（手書き計算演習用） ==================== -->
+  <div id="screen-print" class="hidden flex-1 flex flex-col bg-white text-black overflow-y-auto p-6">
+    
+    <!-- 画面操作バー（印刷時は非表示） -->
+    <div class="no-print bg-slate-800 text-white p-4 rounded-xl mb-6 flex items-center justify-between max-w-5xl mx-auto w-full shadow-lg">
+      <div class="space-y-0.5">
+        <h3 class="text-xl font-black text-amber-300">🖨️ 手書き計算トレーニングプリント（全20問・計算スペース付き）</h3>
+        <p class="text-xs text-slate-300">印刷またはPDF保存して、必ず「使う公式」と「途中の計算式」を手で書いて解きましょう。</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="openPrintScreen('random')" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black px-4 py-2 rounded-lg text-sm">🔄 別の20問を再生成</button>
+        <button onclick="togglePrintAnswers()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-4 py-2 rounded-lg text-sm">👁️ 模範解答の表示切替</button>
+        <button onclick="window.print()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-5 py-2 rounded-lg text-sm shadow">🖨️ 印刷 / PDF出力</button>
+        <button onclick="closePrintScreen()" class="bg-slate-600 hover:bg-slate-500 text-white font-bold px-4 py-2 rounded-lg text-sm">戻る</button>
+      </div>
+    </div>
+
+    <!-- プリント本体（A4レイアウト最適化） -->
+    <div class="max-w-5xl mx-auto w-full space-y-4">
+      <!-- プリントヘッダー -->
+      <div class="border-b-2 border-black pb-3 flex justify-between items-end">
+        <div>
+          <div class="text-xs font-bold">中学2年理科 電気の計算・公式徹底演習プリント</div>
+          <h1 id="print-title" class="text-2xl font-black">電気公式 計算トレーニング小テスト（20問）</h1>
+        </div>
+        <div class="flex items-end gap-4 text-sm font-bold">
+          <div class="border-b border-black w-28 pb-1">実施日：　　/　　</div>
+          <div class="border-b border-black w-56 pb-1" id="print-student-name">氏名：</div>
+          <div class="border-2 border-black px-4 py-1 text-base">得点：　　　 / 20</div>
+        </div>
+      </div>
+
+      <p class="text-xs font-bold text-slate-700">
+        ※ 答えだけでなく、必ず【使う公式】や【途中の計算式（単位の変換含む）】を空欄に書いてから答えを求めなさい。
+      </p>
+
+      <!-- 問題20問グリッド（2列×10行） -->
+      <div id="print-questions-grid" class="grid grid-cols-2 gap-3 text-sm">
+        <!-- JSで20問を生成 -->
+      </div>
+
+      <!-- 解答・解説一覧（改ページまたは下部に配置） -->
+      <div id="print-answers-section" class="pt-6 border-t-2 border-dashed border-slate-400 mt-8">
+        <h2 class="text-lg font-black mb-2">【解答と途中の計算式（自己採点用）】</h2>
+        <div id="print-answers-grid" class="grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
+          <!-- JSで解答を生成 -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== JavaScript ロジック ==================== -->
+  <script>
+    /**************************************************************
+     * 1. 状態管理変数とサウンド合成（Web Audio API）
+     **************************************************************/
+    let playerName = "";
+    let gameDuration = 60;
+    let timeLeft = 60;
+    let timerInterval = null;
+    let isPlaying = false;
+
+    let score = 0;
+    let combo = 0;
+    let maxCombo = 0;
+    let correctCount = 0;
+    let missCount = 0;
+    let hintPenaltySlots = [false, false]; // ヒント使用によるスコア半減フラグ（上下2枠分）
+
+    // 上下2つのスロットの状態
+    let slots = [
+      { problem: null, waiting: false, timeoutId: null },
+      { problem: null, waiting: false, timeoutId: null }
+    ];
+
+    // 全画面ペナルティフリーズ状態
+    let isGlobalFrozen = false;
+    let globalFreezeTimeoutId = null;
+
+    // ニガテ分析トラッキング用
+    const categoryStats = {
+      ohm: { name: "オームの法則 (V=RI)", miss: 0 },
+      unit_ma: { name: "電流の単位変換 (mA→A)", miss: 0 },
+      power: { name: "電力と逆算 (P=VI)", miss: 0 },
+      energy: { name: "熱量・電力量 (J=Pt / Wh)", miss: 0 },
+      unit_min: { name: "時間の単位変換 (分→秒)", miss: 0 },
+      circuit: { name: "2つの抵抗 (直列・並列)", miss: 0 }
+    };
+    let missedProblemsLog = []; // 間違えた問題を復習プリント用に保存
+    let previousScreen = "screen-home";
+
+    // Web Audio API 効果音（外部ファイル不要でiPadでも確実に鳴る）
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playSound(type) {
+      try {
+        initAudio();
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+
+        if (type === 'correct') {
+          // 気持ちいいピンポン音（コンボが高いと少し音程アップ）
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          const baseFreq = Math.min(523.25 + combo * 15, 880);
+          osc.frequency.setValueAtTime(baseFreq, now);
+          osc.frequency.setValueAtTime(baseFreq * 1.25, now + 0.08);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.28);
+        } else if (type === 'wrong') {
+          // ブブー音
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(160, now);
+          osc.frequency.setValueAtTime(130, now + 0.15);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.4);
+        } else if (type === 'finish') {
+          // ファンファーレ風和音
+          const freqs = [523.25, 659.25, 783.99, 1046.5];
+          freqs.forEach((f, idx) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(f, now + idx * 0.1);
+            gain.gain.setValueAtTime(0.2, now + idx * 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.6);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + idx * 0.1);
+            osc.stop(now + idx * 0.1 + 0.6);
+          });
+        }
+      } catch (e) {
+        // 音声エラー時は無視してゲーム進行
+      }
+    }
+
+    /**************************************************************
+     * 2. 初期化（名前の自動保存・読み込み）
+     **************************************************************/
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedName = localStorage.getItem('denki_master_player_name');
+      const nameInput = document.getElementById('player-name');
+      if (savedName && nameInput) {
+        nameInput.value = savedName;
+      }
+      if (nameInput) {
+        nameInput.addEventListener('input', (e) => {
+          localStorage.setItem('denki_master_player_name', e.target.value.trim());
+          document.getElementById('name-warning').classList.add('hidden');
+        });
+      }
+    });
+
+    /**************************************************************
+     * 3. 全18パターン 暗算特化・問題自動生成エンジン
+     **************************************************************/
+    function pick(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function formatNum(n) {
+      return Number(Math.round(n + 'e4') + 'e-4');
+    }
+
+    // 重複のない4択（正解1＋ダミー3）を生成してシャッフルする関数
+    function buildOptions(answer, rawDummies, unit) {
+      const cleanAns = formatNum(answer);
+      const uniqueValues = new Set([cleanAns]);
+      const finalOptions = [{ text: `${cleanAns}${unit}`, isCorrect: true }];
+
+      for (let d of rawDummies) {
+        let val = formatNum(d);
+        if (val > 0 && !uniqueValues.has(val)) {
+          uniqueValues.add(val);
+          finalOptions.push({ text: `${val}${unit}`, isCorrect: false });
+        }
+        if (finalOptions.length === 4) break;
+      }
+
+      // もしダミーが重複して4つに満たない場合の自動補完
+      const multipliers = [2, 10, 0.5, 4, 5, 0.1];
+      let idx = 0;
+      while (finalOptions.length < 4) {
+        let fallback = formatNum(cleanAns * multipliers[idx % multipliers.length] + (idx > 3 ? idx : 0));
+        if (fallback > 0 && !uniqueValues.has(fallback)) {
+          uniqueValues.add(fallback);
+          finalOptions.push({ text: `${fallback}${unit}`, isCorrect: false });
+        }
+        idx++;
+      }
+
+      // フィッシャー–イェーツのシャッフル
+      for (let i = finalOptions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [finalOptions[i], finalOptions[j]] = [finalOptions[j], finalOptions[i]];
+      }
+      return finalOptions;
+    }
+
+    // 全18パターンのジェネレーター配列
+    const problemGenerators = [
+      // ① オーム：Vを求める (V = R * I)
+      () => {
+        const R = pick([2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30]);
+        const I = pick([0.5, 2, 3, 4, 5]);
+        const V = formatNum(R * I);
+        return {
+          category: 'ohm',
+          question: `${R}Ωの抵抗に ${I}A の電流が流れている。加わっている電圧は何Vか？`,
+          unit: 'V',
+          answer: V,
+          dummies: [formatNum(R / I), formatNum(I / R), formatNum(R + I), formatNum(V * 10)],
+          formula: 'V ＝ R × I （電圧 ＝ 抵抗 × 電流）',
+          explanation: `${R}Ω × ${I}A ＝ ${V}V`
+        };
+      },
+      // ② オーム：Rを求める (R = V / I)
+      () => {
+        const I = pick([2, 3, 4, 5, 6]);
+        const R = pick([2, 3, 4, 5, 8, 10, 12, 15]);
+        const V = formatNum(R * I);
+        return {
+          category: 'ohm',
+          question: `抵抗に ${V}V の電圧を加えると ${I}A の電流が流れた。抵抗は何Ωか？`,
+          unit: 'Ω',
+          answer: R,
+          dummies: [formatNum(V * I), formatNum(I / V), formatNum(V - I), formatNum(R * 10)],
+          formula: 'R ＝ V ÷ I （抵抗 ＝ 電圧 ÷ 電流）',
+          explanation: `${V}V ÷ ${I}A ＝ ${R}Ω`
+        };
+      },
+      // ③ オーム：Iを求める (I = V / R)
+      () => {
+        const pair = pick([
+          { V: 6, R: 2 }, { V: 6, R: 3 }, { V: 12, R: 3 }, { V: 12, R: 4 }, { V: 12, R: 6 },
+          { V: 10, R: 2 }, { V: 10, R: 5 }, { V: 15, R: 3 }, { V: 15, R: 5 }, { V: 20, R: 4 },
+          { V: 20, R: 5 }, { V: 24, R: 6 }, { V: 3, R: 6 }, { V: 4, R: 8 }, { V: 2, R: 10 }
+        ]);
+        const I = formatNum(pair.V / pair.R);
+        return {
+          category: 'ohm',
+          question: `${pair.R}Ωの抵抗に ${pair.V}V の電圧を加えた。流れる電流は何Aか？`,
+          unit: 'A',
+          answer: I,
+          dummies: [formatNum(pair.V * pair.R), formatNum(pair.R / pair.V), formatNum(I * 10)],
+          formula: 'I ＝ V ÷ R （電流 ＝ 電圧 ÷ 抵抗）',
+          explanation: `${pair.V}V ÷ ${pair.R}Ω ＝ ${I}A`
+        };
+      },
+      // ④ mAトラップ：Rを求める (mA → A)
+      () => {
+        const p = pick([
+          { V: 6, mA: 500, A: 0.5, R: 12 },
+          { V: 10, mA: 500, A: 0.5, R: 20 },
+          { V: 4, mA: 200, A: 0.2, R: 20 },
+          { V: 6, mA: 200, A: 0.2, R: 30 },
+          { V: 8, mA: 400, A: 0.4, R: 20 },
+          { V: 9, mA: 300, A: 0.3, R: 30 },
+          { V: 3, mA: 500, A: 0.5, R: 6 },
+          { V: 5, mA: 100, A: 0.1, R: 50 }
+        ]);
+        return {
+          category: 'unit_ma',
+          question: `${p.V}Vの電圧を加えると ${p.mA}mA の電流が流れた。抵抗は何Ωか？`,
+          unit: 'Ω',
+          answer: p.R,
+          dummies: [formatNum(p.V * p.A), formatNum(p.mA / p.V), formatNum(p.V * p.mA), formatNum(p.R / 10)],
+          formula: '1000mA＝1A に直してから R ＝ V ÷ I',
+          explanation: `${p.mA}mA ＝ ${p.A}A なので、${p.V}V ÷ ${p.A}A ＝ ${p.R}Ω`
+        };
+      },
+      // ⑤ mAトラップ：Vを求める (mA → A)
+      () => {
+        const p = pick([
+          { R: 10, mA: 500, A: 0.5, V: 5 },
+          { R: 20, mA: 300, A: 0.3, V: 6 },
+          { R: 15, mA: 200, A: 0.2, V: 3 },
+          { R: 30, mA: 400, A: 0.4, V: 12 },
+          { R: 25, mA: 200, A: 0.2, V: 5 },
+          { R: 40, mA: 500, A: 0.5, V: 20 },
+          { R: 8, mA: 500, A: 0.5, V: 4 }
+        ]);
+        return {
+          category: 'unit_ma',
+          question: `${p.R}Ωの抵抗に ${p.mA}mA の電流が流れた。加えた電圧は何Vか？`,
+          unit: 'V',
+          answer: p.V,
+          dummies: [formatNum(p.R * p.mA), formatNum(p.R / p.A), formatNum(p.V * 10)],
+          formula: '1000mA＝1A に直してから V ＝ R × I',
+          explanation: `${p.mA}mA ＝ ${p.A}A なので、${p.R}Ω × ${p.A}A ＝ ${p.V}V`
+        };
+      },
+      // ⑥ 電力：Pを求める (P = V * I)
+      () => {
+        const V = pick([6, 10, 12, 20, 50, 100]);
+        const I = pick([0.5, 2, 3, 4, 5, 6]);
+        const P = formatNum(V * I);
+        return {
+          category: 'power',
+          question: `${V}Vの電圧を加えると ${I}A の電流が流れた。消費電力は何Wか？`,
+          unit: 'W',
+          answer: P,
+          dummies: [formatNum(V / I), formatNum(I / V), formatNum(V + I), formatNum(P * 10)],
+          formula: 'P ＝ V × I （電力 ＝ 電圧 × 電流）',
+          explanation: `${V}V × ${I}A ＝ ${P}W`
+        };
+      },
+      // ⑦ 電力逆算：Vを求める (V = P / I)
+      () => {
+        const I = pick([2, 3, 4, 5, 10]);
+        const V = pick([6, 10, 12, 20, 100]);
+        const P = formatNum(V * I);
+        return {
+          category: 'power',
+          question: `${I}Aの電流が流れており、消費電力が ${P}W である。電圧は何Vか？`,
+          unit: 'V',
+          answer: V,
+          dummies: [formatNum(P * I), formatNum(I / P), formatNum(V / 10)],
+          formula: 'V ＝ P ÷ I （電圧 ＝ 電力 ÷ 電流）',
+          explanation: `${P}W ÷ ${I}A ＝ ${V}V`
+        };
+      },
+      // ⑧ 電力逆算：Iを求める (I = P / V)
+      () => {
+        const V = pick([6, 10, 12, 20, 50]);
+        const I = pick([0.5, 2, 3, 4, 5]);
+        const P = formatNum(V * I);
+        return {
+          category: 'power',
+          question: `${V}Vの電源につないだとき、消費電力が ${P}W だった。電流は何Aか？`,
+          unit: 'A',
+          answer: I,
+          dummies: [formatNum(P * V), formatNum(V / P), formatNum(I * 10)],
+          formula: 'I ＝ P ÷ V （電流 ＝ 電力 ÷ 電圧）',
+          explanation: `${P}W ÷ ${V}V ＝ ${I}A`
+        };
+      },
+      // ⑨ 家電の表示から電流Iを求める
+      () => {
+        const item = pick([
+          { name: 'ドライヤー', P: 1200, I: 12 },
+          { name: 'ドライヤー', P: 1000, I: 10 },
+          { name: '電子レンジ', P: 500, I: 5 },
+          { name: '電気ポット', P: 800, I: 8 },
+          { name: 'アイロン', P: 600, I: 6 },
+          { name: 'ヒーター', P: 400, I: 4 },
+          { name: 'テレビ', P: 200, I: 2 },
+          { name: '電球', P: 50, I: 0.5 }
+        ]);
+        return {
+          category: 'power',
+          question: `「100V-${item.P}W」と書かれた${item.name}を100Vで使った。流れる電流は何Aか？`,
+          unit: 'A',
+          answer: item.I,
+          dummies: [formatNum(100 / item.P), formatNum(item.P * 100), formatNum(item.I * 10)],
+          formula: 'I ＝ P ÷ V （電力 ÷ 電圧）',
+          explanation: `${item.P}W ÷ 100V ＝ ${item.I}A`
+        };
+      },
+      // ⑩ 家電の表示から抵抗Rを求める（2ステップ暗算）
+      () => {
+        const item = pick([
+          { P: 1000, I: 10, R: 10 },
+          { P: 500, I: 5, R: 20 },
+          { P: 200, I: 2, R: 50 },
+          { P: 400, I: 4, R: 25 },
+          { P: 100, I: 1, R: 100 }
+        ]);
+        return {
+          category: 'power',
+          question: `「100V-${item.P}W」の電熱器を100Vで使った。この電熱器の抵抗は何Ωか？`,
+          unit: 'Ω',
+          answer: item.R,
+          dummies: [item.I, formatNum(item.P / 10), formatNum(100 * item.I)],
+          formula: '① I＝P÷V で電流を出す → ② R＝V÷I で抵抗を出す',
+          explanation: `電流は ${item.P}÷100＝${item.I}A。抵抗は 100V÷${item.I}A＝${item.R}Ω`
+        };
+      },
+      // ⑪ 熱量Jを求める（秒）
+      () => {
+        const P = pick([5, 6, 8, 10, 12, 15, 20, 30, 50]);
+        const t = pick([10, 20, 30, 40, 50, 60]);
+        const J = formatNum(P * t);
+        return {
+          category: 'energy',
+          question: `消費電力 ${P}W の電熱線に ${t}秒間 電流を流した。発生する熱量は何Jか？`,
+          unit: 'J',
+          answer: J,
+          dummies: [formatNum(P / t), formatNum(t / P), formatNum(J / 10), formatNum(P + t)],
+          formula: '熱量(J) ＝ 電力(W) × 時間(秒)',
+          explanation: `${P}W × ${t}秒 ＝ ${J}J`
+        };
+      },
+      // ⑫ 熱量Jを求める（分→秒トラップ）
+      () => {
+        const P = pick([5, 10, 15, 20, 30, 50]);
+        const min = pick([1, 2, 3, 5]);
+        const sec = min * 60;
+        const J = formatNum(P * sec);
+        return {
+          category: 'unit_min',
+          question: `消費電力 ${P}W の電熱線に ${min}分間 電流を流した。発生する熱量は何Jか？`,
+          unit: 'J',
+          answer: J,
+          dummies: [formatNum(P * min), formatNum(P * min * 10), formatNum(sec)],
+          formula: '1分＝60秒 に直してから 熱量(J) ＝ 電力(W) × 時間(秒)',
+          explanation: `${min}分 ＝ ${sec}秒 なので、${P}W × ${sec}秒 ＝ ${J}J`
+        };
+      },
+      // ⑬ 電力量(Wh)を求める
+      () => {
+        const P = pick([100, 150, 200, 300, 400, 500, 600]);
+        const h = pick([2, 3, 4, 5]);
+        const Wh = formatNum(P * h);
+        return {
+          category: 'energy',
+          question: `消費電力 ${P}W の器具を ${h}時間 使用した。消費した電力量は何Whか？`,
+          unit: 'Wh',
+          answer: Wh,
+          dummies: [formatNum(P / h), formatNum(P * h * 60), formatNum(Wh / 10)],
+          formula: '電力量(Wh) ＝ 電力(W) × 時間(h)',
+          explanation: `${P}W × ${h}時間 ＝ ${Wh}Wh`
+        };
+      },
+      // ⑭ 時間(秒)の逆算 (t = J / P)
+      () => {
+        const P = pick([5, 6, 10, 12, 15, 20, 30]);
+        const t = pick([10, 20, 30, 40, 50, 60]);
+        const J = formatNum(P * t);
+        return {
+          category: 'energy',
+          question: `${P}Wのモーターで ${J}J の電力量を消費した。動かした時間は何秒間か？`,
+          unit: '秒',
+          answer: t,
+          dummies: [formatNum(J * P), formatNum(t / 10), formatNum(J - P)],
+          formula: '時間(秒) ＝ 電力量・熱量(J) ÷ 電力(W)',
+          explanation: `${J}J ÷ ${P}W ＝ ${t}秒`
+        };
+      },
+      // ⑮ 直列回路の合成抵抗 (R = R1 + R2)
+      () => {
+        const R1 = pick([5, 10, 12, 15, 20, 25, 30, 40]);
+        const R2 = pick([5, 10, 15, 20, 30, 50]);
+        const R = R1 + R2;
+        return {
+          category: 'circuit',
+          question: `${R1}Ωの抵抗と ${R2}Ωの抵抗を「直列」につないだ。全体の抵抗は何Ωか？`,
+          unit: 'Ω',
+          answer: R,
+          dummies: [formatNum((R1 * R2) / (R1 + R2)), Math.abs(R1 - R2) || 5, formatNum(R1 * R2)],
+          formula: '直列回路の全体の抵抗 ＝ R1 ＋ R2 （足し算）',
+          explanation: `${R1}Ω ＋ ${R2}Ω ＝ ${R}Ω`
+        };
+      },
+      // ⑯ 並列回路の合成抵抗（暗算で瞬殺できるペアのみ）
+      () => {
+        const p = pick([
+          { R1: 10, R2: 10, ans: 5, note: '同じ抵抗2つの並列は半分(÷2)' },
+          { R1: 20, R2: 20, ans: 10, note: '同じ抵抗2つの並列は半分(÷2)' },
+          { R1: 30, R2: 30, ans: 15, note: '同じ抵抗2つの並列は半分(÷2)' },
+          { R1: 40, R2: 40, ans: 20, note: '同じ抵抗2つの並列は半分(÷2)' },
+          { R1: 12, R2: 12, ans: 6, note: '同じ抵抗2つの並列は半分(÷2)' },
+          { R1: 6, R2: 3, ans: 2, note: '並列の抵抗は1つ分より小さくなる' }
+        ]);
+        const qText = p.R1 === p.R2
+          ? `${p.R1}Ωの抵抗を2つ「並列」につないだ。全体の抵抗は何Ωか？`
+          : `${p.R1}Ωと${p.R2}Ωの抵抗を「並列」につないだ。全体の抵抗は何Ωか？`;
+        return {
+          category: 'circuit',
+          question: qText,
+          unit: 'Ω',
+          answer: p.ans,
+          dummies: [p.R1 + p.R2, p.R1, p.R1 * 2],
+          formula: `並列回路の合成抵抗（${p.note}）`,
+          explanation: `1/${p.R1} ＋ 1/${p.R2} ＝ 1/${p.ans} より、全体の抵抗は ${p.ans}Ω`
+        };
+      },
+      // ⑰ 直列回路の全体の電流
+      () => {
+        const p = pick([
+          { R1: 10, R2: 20, V: 6, I: 0.2 },
+          { R1: 10, R2: 20, V: 15, I: 0.5 },
+          { R1: 2, R2: 3, V: 10, I: 2 },
+          { R1: 2, R2: 4, V: 12, I: 2 },
+          { R1: 3, R2: 5, V: 24, I: 3 },
+          { R1: 4, R2: 6, V: 20, I: 2 },
+          { R1: 5, R2: 15, V: 10, I: 0.5 }
+        ]);
+        const Rsum = p.R1 + p.R2;
+        return {
+          category: 'circuit',
+          question: `${p.R1}Ωと${p.R2}Ωの抵抗を「直列」につなぎ、全体に${p.V}Vを加えた。流れる電流は何Aか？`,
+          unit: 'A',
+          answer: p.I,
+          dummies: [formatNum(p.V / p.R1), formatNum(p.V / p.R2), formatNum(Rsum / p.V)],
+          formula: '①直列の抵抗を足す → ②全体の電圧 ÷ 全体の抵抗',
+          explanation: `全体の抵抗は ${p.R1}＋${p.R2}＝${Rsum}Ω。電流は ${p.V}V ÷ ${Rsum}Ω ＝ ${p.I}A`
+        };
+      },
+      // ⑱ 並列回路の全体の電流
+      () => {
+        const p = pick([
+          { R1: 2, R2: 3, V: 6, I1: 3, I2: 2, I: 5 },
+          { R1: 3, R2: 6, V: 6, I1: 2, I2: 1, I: 3 },
+          { R1: 4, R2: 6, V: 12, I1: 3, I2: 2, I: 5 },
+          { R1: 2, R2: 5, V: 10, I1: 5, I2: 2, I: 7 },
+          { R1: 5, R2: 10, V: 10, I1: 2, I2: 1, I: 3 }
+        ]);
+        return {
+          category: 'circuit',
+          question: `${p.R1}Ωと${p.R2}Ωの抵抗を「並列」につなぎ、${p.V}Vを加えた。回路全体の電流は何Aか？`,
+          unit: 'A',
+          answer: p.I,
+          dummies: [formatNum(p.V / (p.R1 + p.R2)), p.I1, p.I2],
+          formula: '並列は各抵抗に同じ電圧がかかる → それぞれの電流を出して足す',
+          explanation: `${p.V}÷${p.R1}＝${p.I1}A と ${p.V}÷${p.R2}＝${p.I2}A を足して、全体は ${p.I}A`
+        };
+      }
+    ];
+
+    // ランダムな1問を生成する（現在他の枠に出ている問題文と被らないようにする）
+    function createRandomProblem(excludeQuestions = []) {
+      let problemData = null;
+      for (let attempt = 0; attempt < 10; attempt++) {
+        const gen = pick(problemGenerators);
+        const raw = gen();
+        if (!excludeQuestions.includes(raw.question)) {
+          problemData = raw;
+          break;
+        }
+        problemData = raw;
+      }
+      problemData.options = buildOptions(problemData.answer, problemData.dummies, problemData.unit);
+      return problemData;
+    }
+
+    /**************************************************************
+     * 4. ゲーム進行＆3枠独立更新ロジック
+     **************************************************************/
+    function switchScreen(screenId) {
+      const screens = ['screen-home', 'screen-study', 'screen-game', 'screen-result', 'screen-print'];
+      screens.forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      document.getElementById(screenId).classList.remove('hidden');
+      if (screenId !== 'screen-result') {
+        stopConfetti();
+      }
+    }
+
+    function showHome() {
+      isPlaying = false;
+      isGlobalFrozen = false;
+      if (timerInterval) clearInterval(timerInterval);
+      if (globalFreezeTimeoutId) clearTimeout(globalFreezeTimeoutId);
+      slots.forEach(s => {
+        if (s.timeoutId) clearTimeout(s.timeoutId);
+        s.waiting = false;
+      });
+      document.getElementById('global-freeze-overlay').classList.add('hidden');
+      switchScreen('screen-home');
+    }
+
+    function startGame(seconds) {
+      const nameInput = document.getElementById('player-name');
+      playerName = nameInput.value.trim();
+      if (!playerName) {
+        document.getElementById('name-warning').classList.remove('hidden');
+        nameInput.focus();
+        return;
+      }
+      localStorage.setItem('denki_master_player_name', playerName);
+
+      initAudio();
+      gameDuration = seconds;
+      timeLeft = seconds;
+      score = 0;
+      combo = 0;
+      maxCombo = 0;
+      correctCount = 0;
+      missCount = 0;
+      hintPenaltySlots = [false, false];
+      missedProblemsLog = [];
+      isGlobalFrozen = false;
+      if (globalFreezeTimeoutId) clearTimeout(globalFreezeTimeoutId);
+
+      Object.keys(categoryStats).forEach(k => categoryStats[k].miss = 0);
+
+      document.getElementById('hint-bar').classList.add('hidden');
+      document.getElementById('global-freeze-overlay').classList.add('hidden');
+      updateStatusUI();
+      updateTimerUI();
+
+      switchScreen('screen-game');
+      isPlaying = true;
+
+      // 上下2つの問題枠を初期化
+      for (let i = 0; i < 2; i++) {
+        if (slots[i].timeoutId) clearTimeout(slots[i].timeoutId);
+        slots[i].waiting = false;
+        document.getElementById(`slot-wait-${i}`).classList.add('hidden');
+        loadNewProblemIntoSlot(i, false);
+      }
+
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        if (!isPlaying) return;
+        timeLeft--;
+        updateTimerUI();
+        if (timeLeft <= 0) {
+          finishGame();
+        }
+      }, 1000);
+    }
+
+    function loadNewProblemIntoSlot(slotIndex, isGentleFade = false) {
+      if (!isPlaying) return;
+
+      const otherQuestions = slots
+        .map((s, idx) => (idx !== slotIndex && s.problem ? s.problem.question : null))
+        .filter(Boolean);
+
+      const newProb = createRandomProblem(otherQuestions);
+      slots[slotIndex].problem = newProb;
+      slots[slotIndex].waiting = false;
+
+      const waitEl = document.getElementById(`slot-wait-${slotIndex}`);
+      const qEl = document.getElementById(`slot-q-${slotIndex}`);
+      const optsEl = document.getElementById(`slot-opts-${slotIndex}`);
+      const containerEl = document.getElementById(`slot-container-${slotIndex}`);
+
+      waitEl.classList.add('hidden');
+
+      // アニメーション適用（2秒ディレイ後はふわっとフェードイン）
+      containerEl.classList.remove('animate-pop', 'animate-fade-in');
+      void containerEl.offsetWidth;
+      containerEl.classList.add(isGentleFade ? 'animate-fade-in' : 'animate-pop');
+
+      renderSlotQuestionText(slotIndex);
+
+      optsEl.innerHTML = '';
+      newProb.options.forEach((opt) => {
+        const btn = document.createElement('button');
+        btn.className = `slot-${slotIndex}-btn border-4 rounded-2xl font-black text-3xl md:text-4xl shadow-md transition transform active:scale-95 flex items-center justify-center px-3`;
+        btn.textContent = opt.text;
+        btn.onclick = () => handleAnswerTap(slotIndex, opt.isCorrect);
+        optsEl.appendChild(btn);
+      });
+    }
+
+    function renderSlotQuestionText(slotIndex) {
+      const prob = slots[slotIndex].problem;
+      if (!prob) return;
+      const qEl = document.getElementById(`slot-q-${slotIndex}`);
+      const numBadge = ['①', '②'][slotIndex];
+      const penaltyBadge = hintPenaltySlots[slotIndex]
+        ? `<span class="ml-3 text-sm bg-amber-500 text-white px-3 py-1 rounded-full align-middle shadow">💡ヒント使用(得点半分)</span>`
+        : '';
+      qEl.innerHTML = `<span>【問${numBadge}】 ${prob.question}${penaltyBadge}</span>`;
+    }
+
+    function handleAnswerTap(slotIndex, isCorrect) {
+      if (!isPlaying || isGlobalFrozen || slots[slotIndex].waiting) return;
+
+      const currentProb = slots[slotIndex].problem;
+
+      if (isCorrect) {
+        // 正解！
+        playSound('correct');
+        correctCount++;
+        combo++;
+        if (combo > maxCombo) maxCombo = combo;
+
+        // 基礎100点 ＋ コンボボーナス（1コンボごとに+25点）
+        let gained = 100 + (combo - 1) * 25;
+        if (hintPenaltySlots[slotIndex]) {
+          gained = Math.floor(gained / 2);
+          hintPenaltySlots[slotIndex] = false; // 解いた枠のヒントペナルティを消化
+        }
+        score += gained;
+        updateStatusUI();
+
+        // 両方の枠でヒントペナルティが消化されたらヒントバーを閉じる
+        if (!hintPenaltySlots.some(Boolean)) {
+          document.getElementById('hint-bar').classList.add('hidden');
+        }
+
+        // 正解した枠を2秒間「お休み（空白）状態」にしてもう片方の問題へ視線を誘導
+        slots[slotIndex].waiting = true;
+        document.getElementById(`slot-wait-${slotIndex}`).classList.remove('hidden');
+
+        if (slots[slotIndex].timeoutId) clearTimeout(slots[slotIndex].timeoutId);
+        slots[slotIndex].timeoutId = setTimeout(() => {
+          if (!isPlaying) return; // 終了間際にタイムアップしていた場合はキャンセル
+          loadNewProblemIntoSlot(slotIndex, true);
+        }, 2000);
+
+      } else {
+        // お手つき！全画面4秒フリーズ＆正しい解き方を特大表示
+        playSound('wrong');
+        missCount++;
+        combo = 0;
+        updateStatusUI();
+
+        // ニガテ分析に記録
+        if (categoryStats[currentProb.category]) {
+          categoryStats[currentProb.category].miss++;
+        }
+        missedProblemsLog.push(currentProb);
+
+        triggerGlobalFreeze(slotIndex, currentProb);
+      }
+    }
+
+    function triggerGlobalFreeze(wrongSlotIndex, prob) {
+      isGlobalFrozen = true;
+      const overlayEl = document.getElementById('global-freeze-overlay');
+      const contentEl = document.getElementById('global-freeze-content');
+      const barEl = document.getElementById('global-freeze-bar');
+
+      const numBadge = ['①', '②'][wrongSlotIndex];
+
+      contentEl.innerHTML = `
+        <div class="text-xl font-extrabold text-rose-300 border-b border-slate-700 pb-3">
+          【問${numBadge}】 ${prob.question}
+        </div>
+        <div class="space-y-2 py-2">
+          <div class="text-2xl font-black text-amber-300">
+            📐 使う公式： ${prob.formula}
+          </div>
+          <div class="text-4xl md:text-5xl font-black text-white tracking-wide pt-1">
+            ✏️ 正しい計算： ${prob.explanation}
+          </div>
+        </div>
+        <div class="inline-block bg-emerald-500 text-slate-950 font-black text-2xl px-6 py-2 rounded-full shadow">
+          正解は「 ${prob.answer}${prob.unit} 」
+        </div>
+      `;
+
+      overlayEl.classList.remove('hidden', 'animate-shake');
+      void overlayEl.offsetWidth;
+      overlayEl.classList.add('animate-shake');
+
+      barEl.classList.remove('freeze-bar');
+      void barEl.offsetWidth;
+      barEl.classList.add('freeze-bar');
+
+      if (globalFreezeTimeoutId) clearTimeout(globalFreezeTimeoutId);
+      globalFreezeTimeoutId = setTimeout(() => {
+        isGlobalFrozen = false;
+        overlayEl.classList.add('hidden');
+        if (isPlaying) {
+          // 4秒間解説を読ませた後、間違えた枠を新しい問題に切り替えて再開
+          loadNewProblemIntoSlot(wrongSlotIndex, true);
+        }
+      }, 4000);
+    }
+
+    // 救済ヒントボタン発動（現在表示されている2問、または待機中の次問のスコアが半分になる）
+    function activateHint() {
+      if (!isPlaying || isGlobalFrozen) return;
+      hintPenaltySlots = [true, true];
+      document.getElementById('hint-bar').classList.remove('hidden');
+
+      // 現在表示中の問題文に「ヒント使用」バッジを即時反映（2秒待機中の枠は次に出る問題に自動引き継ぎ）
+      for (let i = 0; i < 2; i++) {
+        if (slots[i].problem && !slots[i].waiting) {
+          renderSlotQuestionText(i);
+        }
+      }
+    }
+
+    function updateStatusUI() {
+      document.getElementById('game-score').textContent = score.toLocaleString();
+      document.getElementById('game-combo').textContent = combo;
+      const badge = document.getElementById('combo-badge');
+      if (combo >= 2) {
+        badge.classList.remove('scale-90', 'opacity-40');
+        badge.classList.add('scale-105', 'opacity-100');
+      } else {
+        badge.classList.add('scale-90', 'opacity-40');
+        badge.classList.remove('scale-105', 'opacity-100');
+      }
+    }
+
+    function updateTimerUI() {
+      const m = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+      const s = String(timeLeft % 60).padStart(2, '0');
+      const timeStr = `${m}:${s}`;
+      const timerEl = document.getElementById('game-timer');
+      const freezeMirrorEl = document.getElementById('freeze-timer-mirror');
+      timerEl.textContent = timeStr;
+      if (freezeMirrorEl) freezeMirrorEl.textContent = timeStr;
+
+      if (timeLeft <= 10) {
+        timerEl.classList.remove('text-cyan-400');
+        timerEl.classList.add('text-rose-500', 'animate-pulse');
+      } else {
+        timerEl.classList.add('text-cyan-400');
+        timerEl.classList.remove('text-rose-500', 'animate-pulse');
+      }
+    }
+
+    /**************************************************************
+     * 5. リザルト画面 ＆ 多段階ランク演出（2枠＋2秒ディレイ用に最適化）
+     **************************************************************/
+    function finishGame() {
+      isPlaying = false;
+      isGlobalFrozen = false;
+      if (timerInterval) clearInterval(timerInterval);
+      if (globalFreezeTimeoutId) clearTimeout(globalFreezeTimeoutId);
+      slots.forEach(s => {
+        if (s.timeoutId) clearTimeout(s.timeoutId);
+        s.waiting = false;
+      });
+      document.getElementById('global-freeze-overlay').classList.add('hidden');
+
+      playSound('finish');
+      switchScreen('screen-result');
+
+      // モードと名前・現在日時の表示
+      const minLabel = Math.floor(gameDuration / 60) + "分モード";
+      document.getElementById('res-mode-badge').textContent = minLabel;
+      document.getElementById('res-player-name').textContent = playerName;
+
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+      document.getElementById('res-datetime').textContent = dateStr;
+
+      document.getElementById('res-score').textContent = score.toLocaleString();
+      document.getElementById('res-correct').textContent = `${correctCount}問`;
+      document.getElementById('res-max-combo').textContent = maxCombo;
+      document.getElementById('res-miss').textContent = `${missCount}回`;
+
+      // 2枠＋2秒ディレイのリズムに合わせて調整した8段階の豪華ランク判定
+      const timeFactor = gameDuration / 60; // 1分=1, 2分=2, 3分=3
+      const normalizedScore = score / timeFactor;
+
+      const ranks = [
+        { min: 3600, icon: "🌌👑⚡", title: "【神域】ニコラ・テスラ級", msg: "人類の限界を超える超光速の頭脳！電気の世界を完全に極めた伝説の覇者です！！", style: "bg-gradient-to-r from-fuchsia-600 via-amber-500 to-cyan-500 border-yellow-200 text-white", confetti: 220 },
+        { min: 2800, icon: "👑⚡✨", title: "【伝説】エジソン級 電撃王", msg: "圧倒的なひらめきと無双の計算力！クラス誰もが驚く天才発明家レベルです！", style: "bg-gradient-to-r from-amber-500 via-yellow-500 to-orange-500 border-white text-slate-950", confetti: 160 },
+        { min: 2100, icon: "🐉⚡", title: "【SSS】雷神（らいじん）", msg: "カミナリのような凄まじい判断スピード！テストでも満点間違いなしの実力！", style: "bg-gradient-to-r from-indigo-600 to-purple-600 border-amber-300 text-white", confetti: 120 },
+        { min: 1500, icon: "💎⚡", title: "【SS】超電導グランドマスター", msg: "抵抗ゼロのスムーズな思考回路！公式の使い分けが完全に身についています！", style: "bg-gradient-to-r from-cyan-600 to-blue-700 border-cyan-200 text-white", confetti: 80 },
+        { min: 1000, icon: "🏆✨", title: "【S】オームの貴公子・姫", msg: "素晴らしい高得点！単位変換や応用問題にも落ち着いて対応できています！", style: "bg-emerald-700 border-emerald-300 text-white", confetti: 50 },
+        { min: 650, icon: "🥇", title: "【A】熟練の電気エンジニア", msg: "基本の公式がしっかり定着しています！さらなる連続コンボでSランクを目指そう！", style: "bg-blue-800 border-blue-400 text-white", confetti: 25 },
+        { min: 300, icon: "🥈", title: "【B】駆け出し電気技師", msg: "公式の使い方がわかってきました！ミスを減らしてコンボをつなげると一気に伸びます！", style: "bg-slate-800 border-slate-500 text-white", confetti: 0 },
+        { min: 0, icon: "🌱", title: "【C】電気見習いチャレンジャー", msg: "まずは勉強モード（赤シート）で公式を復習してから、もう一度挑戦してみよう！", style: "bg-slate-800 border-slate-600 text-slate-200", confetti: 0 }
+      ];
+
+      const achieved = ranks.find(r => normalizedScore >= r.min) || ranks[ranks.length - 1];
+      const rankBox = document.getElementById('res-rank-box');
+      rankBox.className = `md:col-span-7 rounded-2xl p-5 text-center border-4 flex flex-col items-center justify-center space-y-2 shadow-xl ${achieved.style}`;
+      document.getElementById('res-rank-icon').textContent = achieved.icon;
+      document.getElementById('res-rank-title').textContent = achieved.title;
+      document.getElementById('res-rank-msg').textContent = achieved.msg;
+
+      if (achieved.confetti > 0) {
+        startConfetti(achieved.confetti);
+      }
+
+      // ニガテ分析テキスト生成
+      let worstCat = null;
+      let maxMiss = 0;
+      Object.values(categoryStats).forEach(cat => {
+        if (cat.miss > maxMiss) {
+          maxMiss = cat.miss;
+          worstCat = cat.name;
+        }
+      });
+
+      const analysisEl = document.getElementById('res-analysis');
+      if (correctCount === 0 && missCount === 0) {
+        analysisEl.textContent = "まだ問題を解いていません。勉強モードで公式を確認してチャレンジしよう！";
+      } else if (maxMiss === 0) {
+        analysisEl.textContent = "🎯 ノーミス達成！すべての公式と単位変換を完璧にマスターしています！";
+      } else {
+        analysisEl.textContent = `💡 「${worstCat}」でのお手つきが ${maxMiss}回 ありました。右のボタンから復習プリントを作って手で計算してみよう！`;
+      }
+    }
+
+    /**************************************************************
+     * 6. 勉強モード（赤シート制御）
+     **************************************************************/
+    function showStudyMode() {
+      switchScreen('screen-study');
+      toggleAllRedSheets(false);
+    }
+
+    function toggleSheet(el) {
+      if (el.classList.contains('red-sheet-hidden')) {
+        el.classList.remove('red-sheet-hidden');
+        el.classList.add('red-sheet-revealed');
+      } else {
+        el.classList.remove('red-sheet-revealed');
+        el.classList.add('red-sheet-hidden');
+      }
+    }
+
+    function toggleAllRedSheets(reveal) {
+      const sheets = document.querySelectorAll('.red-sheet, .red-sheet-hidden, .red-sheet-revealed');
+      sheets.forEach(el => {
+        el.classList.remove('red-sheet-hidden', 'red-sheet-revealed');
+        el.classList.add(reveal ? 'red-sheet-revealed' : 'red-sheet-hidden');
+      });
+    }
+
+    /**************************************************************
+     * 7. 手書き計算用プリント自動生成機能（20問）
+     **************************************************************/
+    function openPrintScreen(mode) {
+      // 現在の画面を記憶して戻れるようにする
+      if (!document.getElementById('screen-result').classList.contains('hidden')) {
+        previousScreen = 'screen-result';
+      } else {
+        previousScreen = 'screen-home';
+      }
+
+      const savedName = document.getElementById('player-name').value.trim();
+      document.getElementById('print-student-name').textContent = `氏名：${savedName}`;
+
+      const printProblems = [];
+      if (mode === 'review' && missedProblemsLog.length > 0) {
+        document.getElementById('print-title').textContent = "弱点克服！オーダーメイド復習プリント（20問）";
+        // 間違えた問題を優先的に入れ、残りをランダムで埋める
+        missedProblemsLog.slice(0, 20).forEach(p => printProblems.push(p));
+      } else {
+        document.getElementById('print-title').textContent = "電気公式 計算トレーニング小テスト（20問）";
+      }
+
+      while (printProblems.length < 20) {
+        printProblems.push(createRandomProblem());
+      }
+
+      const qGrid = document.getElementById('print-questions-grid');
+      const aGrid = document.getElementById('print-answers-grid');
+      qGrid.innerHTML = '';
+      aGrid.innerHTML = '';
+
+      printProblems.forEach((prob, idx) => {
+        const num = idx + 1;
+        // 問題枠（手書きで公式・途中式を書く欄を設ける）
+        const qBox = document.createElement('div');
+        qBox.className = "border border-black rounded p-2.5 flex flex-col justify-between min-h-[115px]";
+        qBox.innerHTML = `
+          <div class="font-bold leading-snug">
+            <span class="inline-block bg-black text-white px-1.5 py-0.2 rounded text-xs mr-1">問${num}</span>
+            ${prob.question}
+          </div>
+          <div class="mt-3 pt-2 border-t border-dotted border-slate-400 flex justify-between items-end text-xs text-slate-600">
+            <span>【式・計算】</span>
+            <span class="border-b border-black w-28 text-right font-bold text-black pb-0.5">答：　　　 ${prob.unit}</span>
+          </div>
+        `;
+        qGrid.appendChild(qBox);
+
+        // 解答・途中式枠
+        const aItem = document.createElement('div');
+        aItem.className = "border-b border-slate-200 py-1";
+        aItem.innerHTML = `
+          <span class="font-black">問${num}：${prob.answer}${prob.unit}</span>
+          <span class="text-slate-600 ml-2">（${prob.explanation}）</span>
+        `;
+        aGrid.appendChild(aItem);
+      });
+
+      switchScreen('screen-print');
+    }
+
+    function togglePrintAnswers() {
+      const sec = document.getElementById('print-answers-section');
+      sec.classList.toggle('hidden');
+    }
+
+    function closePrintScreen() {
+      switchScreen(previousScreen);
+    }
+
+    /**************************************************************
+     * 8. 紙吹雪（コンフェッティ）エフェクト
+     **************************************************************/
+    let confettiAnimId = null;
+    function startConfetti(particleCount) {
+      const canvas = document.getElementById('confetti-canvas');
+      canvas.classList.remove('hidden');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const colors = ['#fbbf24', '#38bdf8', '#f43f5e', '#4ade80', '#a855f7', '#ffffff'];
+      const particles = Array.from({ length: particleCount }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height,
+        w: Math.random() * 10 + 6,
+        h: Math.random() * 6 + 4,
+        color: pick(colors),
+        vy: Math.random() * 3 + 2,
+        vx: (Math.random() - 0.5) * 2,
+        angle: Math.random() * 360,
+        spin: (Math.random() - 0.5) * 8
+      }));
+
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.y += p.vy;
+          p.x += p.vx;
+          p.angle += p.spin;
+          if (p.y > canvas.height) {
+            p.y = -10;
+            p.x = Math.random() * canvas.width;
+          }
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.angle * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        });
+        confettiAnimId = requestAnimationFrame(render);
+      }
+      if (confettiAnimId) cancelAnimationFrame(confettiAnimId);
+      render();
+    }
+
+    function stopConfetti() {
+      if (confettiAnimId) cancelAnimationFrame(confettiAnimId);
+      document.getElementById('confetti-canvas').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
