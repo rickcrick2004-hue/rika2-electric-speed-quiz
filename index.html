@@ -109,31 +109,29 @@
         top: 0;
         width: 100%;
         background: white !important;
+        color: black !important;
         padding: 0 !important;
         margin: 0 !important;
       }
       .no-print {
         display: none !important;
       }
-      .print-page-break {
-        page-break-before: always;
-      }
     }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-800 h-screen w-screen overflow-hidden flex flex-col">
+<body class="bg-slate-900 text-slate-800 h-screen w-screen overflow-hidden flex flex-col select-none">
 
-  <!-- 紙吹雪エフェクト用キャンバス -->
+  <!-- 紙吹雪用キャンバス（高ランク達成時） -->
   <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
 
   <!-- ==================== 1. ホーム画面 ==================== -->
-  <div id="screen-home" class="flex-1 flex flex-col justify-between p-6 bg-gradient-to-br from-slate-800 via-blue-950 to-slate-900 text-white overflow-y-auto">
-    <div class="max-w-5xl w-full mx-auto my-auto flex flex-col gap-6">
+  <div id="screen-home" class="flex-1 flex flex-col justify-between p-6 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 text-white overflow-y-auto">
+    <div class="max-w-5xl w-full mx-auto my-auto space-y-6">
       
       <!-- タイトルヘッダー -->
       <div class="text-center space-y-2">
-        <div class="inline-block bg-amber-400 text-slate-900 font-black px-4 py-1 rounded-full text-sm tracking-wider shadow">
-          中学2年理科 第1分野（電気・電流と回路）
+        <div class="inline-block bg-amber-400 text-slate-950 font-black px-4 py-1 rounded-full text-sm tracking-wider shadow">
+          中学2年理科 電流と回路・公式瞬発トレーニング
         </div>
         <h1 class="text-5xl md:text-6xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-200 to-cyan-300 drop-shadow">
           ⚡ 電気公式マスター ⚡
@@ -411,7 +409,7 @@
             <div id="res-main-metric-label" class="text-sm font-bold text-slate-400">獲得スコア</div>
             <div id="res-score" class="text-5xl md:text-6xl font-black text-amber-400 tabular-nums">2,450</div>
           </div>
-          <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="grid grid-cols-2 gap-2 text-center">
             <div class="bg-slate-900/60 rounded-xl p-2.5 border border-white/10">
               <div class="text-xs font-bold text-slate-400">正解数</div>
               <div id="res-correct" class="text-2xl font-black text-emerald-400">20問</div>
@@ -423,6 +421,10 @@
             <div class="bg-slate-900/60 rounded-xl p-2.5 border border-white/10">
               <div class="text-xs font-bold text-slate-400">お手つき</div>
               <div id="res-miss" class="text-2xl font-black text-rose-400">1回</div>
+            </div>
+            <div class="bg-slate-900/60 rounded-xl p-2.5 border border-white/10">
+              <div class="text-xs font-bold text-slate-400">ヒント使用</div>
+              <div id="res-hints" class="text-2xl font-black text-amber-400">0回</div>
             </div>
           </div>
         </div>
@@ -527,6 +529,7 @@
     let maxCombo = 0;
     let correctCount = 0;
     let missCount = 0;
+    let totalHintsUsed = 0; // ヒント使用回数の総計トラッキング
     let hintPenaltySlots = [false, false]; // ヒント使用によるスコア半減フラグ（上下2枠分）
 
     // 上下2つのスロットの状態
@@ -693,7 +696,8 @@
           unit: 'V',
           answer: V,
           dummies: [formatNum(R / I), formatNum(I / R), formatNum(R + I), formatNum(V * 10)],
-          formula: 'V ＝ R × I （電圧 ＝ 抵抗 × 電流）',
+          formula: 'V ＝ R × I',
+          calcHint: `${R} × ${I}`,
           explanation: `${R}Ω × ${I}A ＝ ${V}V`
         };
       },
@@ -708,7 +712,8 @@
           unit: 'Ω',
           answer: R,
           dummies: [formatNum(V * I), formatNum(I / V), formatNum(V - I), formatNum(R * 10)],
-          formula: 'R ＝ V ÷ I （抵抗 ＝ 電圧 ÷ 電流）',
+          formula: 'R ＝ V ÷ I',
+          calcHint: `${V} ÷ ${I}`,
           explanation: `${V}V ÷ ${I}A ＝ ${R}Ω`
         };
       },
@@ -726,7 +731,8 @@
           unit: 'A',
           answer: I,
           dummies: [formatNum(pair.V * pair.R), formatNum(pair.R / pair.V), formatNum(I * 10)],
-          formula: 'I ＝ V ÷ R （電流 ＝ 電圧 ÷ 抵抗）',
+          formula: 'I ＝ V ÷ R',
+          calcHint: `${pair.V} ÷ ${pair.R}`,
           explanation: `${pair.V}V ÷ ${pair.R}Ω ＝ ${I}A`
         };
       },
@@ -748,7 +754,8 @@
           unit: 'Ω',
           answer: p.R,
           dummies: [formatNum(p.V * p.A), formatNum(p.mA / p.V), formatNum(p.V * p.mA), formatNum(p.R / 10)],
-          formula: '1000mA＝1A に直してから R ＝ V ÷ I',
+          formula: 'R ＝ V ÷ I （mAをAに直す）',
+          calcHint: `${p.mA}mA＝${p.A}A なので、 ${p.V} ÷ ${p.A}`,
           explanation: `${p.mA}mA ＝ ${p.A}A なので、${p.V}V ÷ ${p.A}A ＝ ${p.R}Ω`
         };
       },
@@ -769,7 +776,8 @@
           unit: 'V',
           answer: p.V,
           dummies: [formatNum(p.R * p.mA), formatNum(p.R / p.A), formatNum(p.V * 10)],
-          formula: '1000mA＝1A に直してから V ＝ R × I',
+          formula: 'V ＝ R × I （mAをAに直す）',
+          calcHint: `${p.mA}mA＝${p.A}A なので、 ${p.R} × ${p.A}`,
           explanation: `${p.mA}mA ＝ ${p.A}A なので、${p.R}Ω × ${p.A}A ＝ ${p.V}V`
         };
       },
@@ -784,7 +792,8 @@
           unit: 'W',
           answer: P,
           dummies: [formatNum(V / I), formatNum(I / V), formatNum(V + I), formatNum(P * 10)],
-          formula: 'P ＝ V × I （電力 ＝ 電圧 × 電流）',
+          formula: 'P ＝ V × I',
+          calcHint: `${V} × ${I}`,
           explanation: `${V}V × ${I}A ＝ ${P}W`
         };
       },
@@ -799,7 +808,8 @@
           unit: 'V',
           answer: V,
           dummies: [formatNum(P * I), formatNum(I / P), formatNum(V / 10)],
-          formula: 'V ＝ P ÷ I （電圧 ＝ 電力 ÷ 電流）',
+          formula: 'V ＝ P ÷ I',
+          calcHint: `${P} ÷ ${I}`,
           explanation: `${P}W ÷ ${I}A ＝ ${V}V`
         };
       },
@@ -814,7 +824,8 @@
           unit: 'A',
           answer: I,
           dummies: [formatNum(P * V), formatNum(V / P), formatNum(I * 10)],
-          formula: 'I ＝ P ÷ V （電流 ＝ 電力 ÷ 電圧）',
+          formula: 'I ＝ P ÷ V',
+          calcHint: `${P} ÷ ${V}`,
           explanation: `${P}W ÷ ${V}V ＝ ${I}A`
         };
       },
@@ -836,7 +847,8 @@
           unit: 'A',
           answer: item.I,
           dummies: [formatNum(100 / item.P), formatNum(item.P * 100), formatNum(item.I * 10)],
-          formula: 'I ＝ P ÷ V （電力 ÷ 電圧）',
+          formula: 'I ＝ P ÷ V',
+          calcHint: `${item.P} ÷ 100`,
           explanation: `${item.P}W ÷ 100V ＝ ${item.I}A`
         };
       },
@@ -855,7 +867,8 @@
           unit: 'Ω',
           answer: item.R,
           dummies: [item.I, formatNum(item.P / 10), formatNum(100 * item.I)],
-          formula: '① I＝P÷V で電流を出す → ② R＝V÷I で抵抗を出す',
+          formula: 'I＝P÷V のあと R＝V÷I',
+          calcHint: `電流は ${item.P}÷100＝${item.I}A なので、 100 ÷ ${item.I}`,
           explanation: `電流は ${item.P}÷100＝${item.I}A。抵抗は 100V÷${item.I}A＝${item.R}Ω`
         };
       },
@@ -870,7 +883,8 @@
           unit: 'J',
           answer: J,
           dummies: [formatNum(P / t), formatNum(t / P), formatNum(J / 10), formatNum(P + t)],
-          formula: '熱量(J) ＝ 電力(W) × 時間(秒)',
+          formula: '熱量(J) ＝ P × t',
+          calcHint: `${P} × ${t}`,
           explanation: `${P}W × ${t}秒 ＝ ${J}J`
         };
       },
@@ -886,7 +900,8 @@
           unit: 'J',
           answer: J,
           dummies: [formatNum(P * min), formatNum(P * min * 10), formatNum(sec)],
-          formula: '1分＝60秒 に直してから 熱量(J) ＝ 電力(W) × 時間(秒)',
+          formula: '熱量(J) ＝ P × 秒 （分を秒に直す）',
+          calcHint: `${min}分＝${sec}秒 なので、 ${P} × ${sec}`,
           explanation: `${min}分 ＝ ${sec}秒 なので、${P}W × ${sec}秒 ＝ ${J}J`
         };
       },
@@ -901,7 +916,8 @@
           unit: 'Wh',
           answer: Wh,
           dummies: [formatNum(P / h), formatNum(P * h * 60), formatNum(Wh / 10)],
-          formula: '電力量(Wh) ＝ 電力(W) × 時間(h)',
+          formula: '電力量(Wh) ＝ P × 時間(h)',
+          calcHint: `${P} × ${h}`,
           explanation: `${P}W × ${h}時間 ＝ ${Wh}Wh`
         };
       },
@@ -916,7 +932,8 @@
           unit: '秒',
           answer: t,
           dummies: [formatNum(J * P), formatNum(t / 10), formatNum(J - P)],
-          formula: '時間(秒) ＝ 電力量・熱量(J) ÷ 電力(W)',
+          formula: '時間(秒) ＝ J ÷ P',
+          calcHint: `${J} ÷ ${P}`,
           explanation: `${J}J ÷ ${P}W ＝ ${t}秒`
         };
       },
@@ -931,7 +948,8 @@
           unit: 'Ω',
           answer: R,
           dummies: [formatNum((R1 * R2) / (R1 + R2)), Math.abs(R1 - R2) || 5, formatNum(R1 * R2)],
-          formula: '直列回路の全体の抵抗 ＝ R1 ＋ R2 （足し算）',
+          formula: '直列の合成抵抗 ＝ R1 ＋ R2',
+          calcHint: `${R1} ＋ ${R2}`,
           explanation: `${R1}Ω ＋ ${R2}Ω ＝ ${R}Ω`
         };
       },
@@ -943,18 +961,22 @@
           { R1: 30, R2: 30, ans: 15, note: '同じ抵抗2つの並列は半分(÷2)' },
           { R1: 40, R2: 40, ans: 20, note: '同じ抵抗2つの並列は半分(÷2)' },
           { R1: 12, R2: 12, ans: 6, note: '同じ抵抗2つの並列は半分(÷2)' },
-          { R1: 6, R2: 3, ans: 2, note: '並列の抵抗は1つ分より小さくなる' }
+          { R1: 6, R2: 3, ans: 2, note: '和分の積：(R1×R2)÷(R1＋R2)' }
         ]);
         const qText = p.R1 === p.R2
           ? `${p.R1}Ωの抵抗を2つ「並列」につないだ。全体の抵抗は何Ωか？`
           : `${p.R1}Ωと${p.R2}Ωの抵抗を「並列」につないだ。全体の抵抗は何Ωか？`;
+        const cHint = p.R1 === p.R2
+          ? `${p.R1} ÷ 2`
+          : `(${p.R1} × ${p.R2}) ÷ (${p.R1} ＋ ${p.R2})`;
         return {
           category: 'circuit',
           question: qText,
           unit: 'Ω',
           answer: p.ans,
           dummies: [p.R1 + p.R2, p.R1, p.R1 * 2],
-          formula: `並列回路の合成抵抗（${p.note}）`,
+          formula: `並列の合成抵抗（${p.note}）`,
+          calcHint: cHint,
           explanation: `1/${p.R1} ＋ 1/${p.R2} ＝ 1/${p.ans} より、全体の抵抗は ${p.ans}Ω`
         };
       },
@@ -976,7 +998,8 @@
           unit: 'A',
           answer: p.I,
           dummies: [formatNum(p.V / p.R1), formatNum(p.V / p.R2), formatNum(Rsum / p.V)],
-          formula: '①直列の抵抗を足す → ②全体の電圧 ÷ 全体の抵抗',
+          formula: '直列の抵抗を足してから I ＝ V ÷ R',
+          calcHint: `全体の抵抗は ${p.R1}＋${p.R2}＝${Rsum}Ω なので、 ${p.V} ÷ ${Rsum}`,
           explanation: `全体の抵抗は ${p.R1}＋${p.R2}＝${Rsum}Ω。電流は ${p.V}V ÷ ${Rsum}Ω ＝ ${p.I}A`
         };
       },
@@ -995,7 +1018,8 @@
           unit: 'A',
           answer: p.I,
           dummies: [formatNum(p.V / (p.R1 + p.R2)), p.I1, p.I2, p.I * 2],
-          formula: '①各抵抗の電流(V÷R)を出す → ②2つの電流を足す',
+          formula: '各抵抗の電流(V÷R)を出して足す',
+          calcHint: `${p.V}÷${p.R1}＝${p.I1}A と ${p.V}÷${p.R2}＝${p.I2}A を足して、 ${p.I1} ＋ ${p.I2}`,
           explanation: `${p.V}÷${p.R1}＝${p.I1}A と ${p.V}÷${p.R2}＝${p.I2}A を足して、${p.I1}＋${p.I2}＝${p.I}A`
         };
       }
@@ -1126,6 +1150,7 @@
       maxCombo = 0;
       correctCount = 0;
       missCount = 0;
+      totalHintsUsed = 0;
       hintPenaltySlots = [false, false];
       missedProblemsLog = [];
       isGlobalFrozen = false;
@@ -1211,12 +1236,13 @@
       const numBadge = ['①', '②'][slotIndex];
 
       if (hintPenaltySlots[slotIndex]) {
-        // ヒントボタンを押した後の表示（その問題の式だけを表示）
+        // ヒントボタンを押した後の表示（使う公式＋実際の数値を当てはめた計算式を表示）
         qEl.innerHTML = `
           <div class="w-full flex flex-col items-center justify-center gap-1.5">
             <div class="leading-snug">【問${numBadge}】 ${prob.question}</div>
-            <div class="bg-amber-100 border-2 border-amber-500 text-amber-950 px-5 py-1 rounded-xl text-xl md:text-2xl font-black shadow-sm flex items-center gap-3">
+            <div class="bg-amber-100 border-2 border-amber-500 text-amber-950 px-5 py-1 rounded-xl text-xl md:text-2xl font-black shadow-sm flex flex-wrap items-center justify-center gap-2">
               <span>💡 使う式： ${prob.formula}</span>
+              <span class="text-rose-600">➔ 【 ${prob.calcHint} 】を計算しよう！</span>
               <span class="text-xs bg-amber-600 text-white px-2.5 py-0.5 rounded-full">得点半分</span>
             </div>
           </div>
@@ -1336,6 +1362,9 @@
     // 各問題枠ごとの個別ヒントボタン発動（押した問題の式だけを表示し、その問題の得点を半分にする）
     function activateSlotHint(slotIndex) {
       if (!isPlaying || isGlobalFrozen || slots[slotIndex].waiting) return;
+      if (!hintPenaltySlots[slotIndex]) {
+        totalHintsUsed++;
+      }
       hintPenaltySlots[slotIndex] = true;
       renderSlotQuestionText(slotIndex);
     }
@@ -1428,6 +1457,7 @@
       document.getElementById('res-correct').textContent = `${correctCount}問`;
       document.getElementById('res-max-combo').textContent = maxCombo;
       document.getElementById('res-miss').textContent = `${missCount}回`;
+      document.getElementById('res-hints').textContent = `${totalHintsUsed}回`;
 
       let achieved = null;
 
@@ -1482,12 +1512,16 @@
       });
 
       const analysisEl = document.getElementById('res-analysis');
+      const hintNote = totalHintsUsed > 0
+        ? `（ヒント使用：${totalHintsUsed}回 ➔ 次はノーヒントでも挑戦してみよう！）`
+        : `（✨ノーヒントでクリア！）`;
+
       if (correctCount === 0 && missCount === 0) {
         analysisEl.textContent = "まだ問題を解いていません。勉強モードで公式を確認してチャレンジしよう！";
       } else if (maxMiss === 0) {
-        analysisEl.textContent = "🎯 ノーミス達成！すべての公式と単位変換を完璧にマスターしています！";
+        analysisEl.textContent = `🎯 ノーミス達成！すべての公式と単位変換を完璧にマスターしています！${hintNote}`;
       } else {
-        analysisEl.textContent = `💡 「${worstCat}」でのお手つきが ${maxMiss}回 ありました。右のボタンから復習プリントを作って手で計算してみよう！`;
+        analysisEl.textContent = `💡 「${worstCat}」でのお手つきが ${maxMiss}回 ありました。${hintNote}`;
       }
     }
 
