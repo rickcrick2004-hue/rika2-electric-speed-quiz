@@ -337,8 +337,8 @@
       </div>
 
       <!-- お手つき時の全画面4秒クールダウン＆特大解説オーバーレイ（落ち着いた配色・救済表示） -->
-      <div id="global-freeze-overlay" class="hidden absolute inset-0 bg-slate-900/95 backdrop-blur-md text-white flex flex-col justify-between p-8 border-8 border-teal-500 z-40">
-        <div class="flex items-center justify-between border-b-2 border-slate-700 pb-4">
+      <div id="global-freeze-overlay" class="hidden absolute inset-0 bg-slate-900/95 backdrop-blur-md text-white flex flex-col justify-between p-6 border-8 border-teal-500 z-40">
+        <div class="flex items-center justify-between border-b-2 border-slate-700 pb-3">
           <div class="flex items-center gap-3">
             <span class="bg-teal-600 text-white font-black px-5 py-2 rounded-xl text-2xl shadow">📘 惜しい！深呼吸して解き方を確認しよう</span>
             <span id="freeze-sub-msg" class="text-teal-200 font-bold text-lg">※焦らなくて大丈夫！ここで公式をチェックして次につなげよう！</span>
@@ -349,15 +349,20 @@
           </div>
         </div>
 
-        <div id="global-freeze-content" class="my-auto max-w-4xl mx-auto w-full bg-slate-800/95 border-4 border-teal-400 rounded-3xl p-7 text-center space-y-4 shadow-2xl">
+        <div id="global-freeze-content" class="my-auto max-w-4xl mx-auto w-full bg-slate-800/95 border-4 border-teal-400 rounded-3xl p-6 text-center space-y-3 shadow-2xl">
           <!-- JSで間違えた問題・正しい公式・計算式・コンボ救済状況を特大表示 -->
         </div>
 
-        <div class="space-y-2 max-w-4xl mx-auto w-full">
-          <div class="text-center text-teal-200 font-bold text-base">心を落ち着けて、もうすぐ再開します...</div>
-          <div class="w-full bg-slate-800 h-5 rounded-full overflow-hidden border-2 border-teal-400 p-0.5">
-            <div id="global-freeze-bar" class="bg-gradient-to-r from-teal-400 to-cyan-300 h-full rounded-full"></div>
+        <div class="space-y-3 max-w-4xl mx-auto w-full flex flex-col items-center">
+          <div class="w-full space-y-1.5">
+            <div id="global-freeze-status-msg" class="text-center text-teal-200 font-bold text-base">解説をしっかり確認しよう…（4秒後に進めます）</div>
+            <div class="w-full bg-slate-800 h-4 rounded-full overflow-hidden border-2 border-teal-400 p-0.5">
+              <div id="global-freeze-bar" class="bg-gradient-to-r from-teal-400 to-cyan-300 h-full rounded-full"></div>
+            </div>
           </div>
+          <button id="btn-freeze-understand" onclick="closeGlobalFreeze()" disabled class="w-full md:w-3/4 py-3.5 px-8 rounded-2xl font-black text-2xl transition-all shadow-lg bg-slate-700 text-slate-400 border-2 border-slate-600 cursor-not-allowed">
+            ⏳ 解説を確認中… (あと4秒)
+          </button>
         </div>
       </div>
 
@@ -542,6 +547,8 @@
     // 全画面ペナルティフリーズ状態
     let isGlobalFrozen = false;
     let globalFreezeTimeoutId = null;
+    let globalFreezeIntervalId = null;
+    let frozenWrongSlotIndex = null;
 
     // ニガテ分析トラッキング用
     const categoryStats = {
@@ -1113,8 +1120,10 @@
     function showHome() {
       isPlaying = false;
       isGlobalFrozen = false;
+      frozenWrongSlotIndex = null;
       if (timerInterval) clearInterval(timerInterval);
       if (globalFreezeTimeoutId) clearTimeout(globalFreezeTimeoutId);
+      if (globalFreezeIntervalId) clearInterval(globalFreezeIntervalId);
       slots.forEach(s => {
         if (s.timeoutId) clearTimeout(s.timeoutId);
         s.waiting = false;
@@ -1156,7 +1165,9 @@
       hintPenaltySlots = [false, false];
       missedProblemsLog = [];
       isGlobalFrozen = false;
+      frozenWrongSlotIndex = null;
       if (globalFreezeTimeoutId) clearTimeout(globalFreezeTimeoutId);
+      if (globalFreezeIntervalId) clearInterval(globalFreezeIntervalId);
 
       Object.keys(categoryStats).forEach(k => categoryStats[k].miss = 0);
 
@@ -1327,9 +1338,12 @@
 
     function triggerGlobalFreeze(wrongSlotIndex, prob, prevCombo = 0) {
       isGlobalFrozen = true;
+      frozenWrongSlotIndex = wrongSlotIndex;
       const overlayEl = document.getElementById('global-freeze-overlay');
       const contentEl = document.getElementById('global-freeze-content');
       const barEl = document.getElementById('global-freeze-bar');
+      const statusMsgEl = document.getElementById('global-freeze-status-msg');
+      const understandBtn = document.getElementById('btn-freeze-understand');
 
       const numBadge = ['①', '②'][wrongSlotIndex];
 
@@ -1390,15 +1404,53 @@
       void barEl.offsetWidth;
       barEl.classList.add('freeze-bar');
 
+      // 4秒間はボタンを押せないようにロックし、カウントダウンを表示
+      let waitSec = 4;
+      statusMsgEl.textContent = '解説をしっかり確認しよう…（4秒後に進めます）';
+      understandBtn.disabled = true;
+      understandBtn.textContent = `⏳ 解説を確認中… (あと${waitSec}秒)`;
+      understandBtn.className = 'w-full md:w-3/4 py-3.5 px-8 rounded-2xl font-black text-2xl transition-all shadow-lg bg-slate-700 text-slate-400 border-2 border-slate-600 cursor-not-allowed';
+
       if (globalFreezeTimeoutId) clearTimeout(globalFreezeTimeoutId);
-      globalFreezeTimeoutId = setTimeout(() => {
-        isGlobalFrozen = false;
-        overlayEl.classList.add('hidden');
-        if (isPlaying) {
-          // 4秒間解説を読ませた後、間違えた枠を新しい問題に切り替えて再開
-          loadNewProblemIntoSlot(wrongSlotIndex, true);
+      if (globalFreezeIntervalId) clearInterval(globalFreezeIntervalId);
+
+      globalFreezeIntervalId = setInterval(() => {
+        waitSec--;
+        if (waitSec > 0 && isPlaying && isGlobalFrozen) {
+          understandBtn.textContent = `⏳ 解説を確認中… (あと${waitSec}秒)`;
         }
+      }, 1000);
+
+      // 4秒経過したら自動で閉じず、「理解した」ボタンを有効化して生徒の操作を待つ
+      globalFreezeTimeoutId = setTimeout(() => {
+        if (globalFreezeIntervalId) clearInterval(globalFreezeIntervalId);
+        if (!isPlaying || !isGlobalFrozen) return;
+
+        statusMsgEl.textContent = '✨ 解き方を理解できたら、下のボタンを押して再開しよう！';
+        understandBtn.disabled = false;
+        understandBtn.textContent = '✅ この内容を理解した！次の問題へ進む';
+        understandBtn.className = 'w-full md:w-3/4 py-3.5 px-8 rounded-2xl font-black text-2xl transition-all shadow-xl bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300 text-slate-950 border-4 border-white cursor-pointer active:scale-95 animate-pop';
       }, 4000);
+    }
+
+    // 4秒経過後に「理解した」ボタンを押したときの再開処理
+    function closeGlobalFreeze() {
+      if (!isGlobalFrozen) return;
+      const understandBtn = document.getElementById('btn-freeze-understand');
+      if (understandBtn && understandBtn.disabled) return;
+
+      if (globalFreezeTimeoutId) clearTimeout(globalFreezeTimeoutId);
+      if (globalFreezeIntervalId) clearInterval(globalFreezeIntervalId);
+
+      isGlobalFrozen = false;
+      document.getElementById('global-freeze-overlay').classList.add('hidden');
+
+      const targetSlot = frozenWrongSlotIndex;
+      frozenWrongSlotIndex = null;
+
+      if (isPlaying && targetSlot !== null) {
+        loadNewProblemIntoSlot(targetSlot, true);
+      }
     }
 
     // 各問題枠ごとの個別ヒントボタン発動（押した問題の式だけを表示し、その問題の得点を半分にする）
@@ -1465,8 +1517,10 @@
     function finishGame() {
       isPlaying = false;
       isGlobalFrozen = false;
+      frozenWrongSlotIndex = null;
       if (timerInterval) clearInterval(timerInterval);
       if (globalFreezeTimeoutId) clearTimeout(globalFreezeTimeoutId);
+      if (globalFreezeIntervalId) clearInterval(globalFreezeIntervalId);
       slots.forEach(s => {
         if (s.timeoutId) clearTimeout(s.timeoutId);
         s.waiting = false;
